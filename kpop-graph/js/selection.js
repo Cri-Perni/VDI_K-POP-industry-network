@@ -59,7 +59,7 @@ export const selectionMixin = {
             currentLinks.forEach(link => {
                 const neighbor = link.neighbor;
                 const row = document.createElement("button");
-                row.className = "w-full text-left flex justify-between items-center bg-slate-800/40 hover:bg-pink-500/10 hover:border-pink-500/20 border border-transparent p-1.5 rounded transition-all cursor-pointer text-slate-300 hover:text-pink-300 text-[11px] focus:outline-none";
+                row.className = "w-full text-left flex justify-between items-center bg-slate-800/40 border border-transparent p-1.5 rounded transition-all cursor-pointer text-slate-300 text-[11px] focus:outline-none";
 
                 let relLabel = "Collaborazione";
                 let relColorClass = "text-emerald-400";

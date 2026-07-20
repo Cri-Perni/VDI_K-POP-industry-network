@@ -54,7 +54,7 @@ export const searchMixin = {
         if (count === 0) {
             countDiv.innerHTML = "<span class='text-red-400 font-semibold'>Nessun risultato trovato</span>";
         } else {
-            countDiv.innerHTML = `<span class='text-pink-400 font-semibold'>${count}</span> ${count === 1 ? 'nodo trovato' : 'nodi trovati'}`;
+            countDiv.innerHTML = `<span class='text-violet-400 font-semibold'>${count}</span> ${count === 1 ? 'nodo trovato' : 'nodi trovati'}`;
         }
 
         this.draw();
