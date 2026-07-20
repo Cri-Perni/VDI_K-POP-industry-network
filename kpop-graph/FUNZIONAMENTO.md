@@ -18,7 +18,7 @@ Applicazione web per visualizzare le relazioni nell'industria **K-Pop** sotto fo
 
 ```
                     ┌──────────────────────┐
-                    │   CSV (nodi + archi)  │
+                    │   CSV (nodi + archi) │
                     └──────────┬───────────┘
                                │
                     ┌──────────▼───────────┐

@@ -8,6 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- D3.js v7 -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="style.css">
     <style>
         canvas { display: block; }
     </style>
@@ -107,7 +108,7 @@
 
         <!-- Area del Grafo -->
         <main class="flex-1 relative bg-slate-950" id="canvas-container">
-            <!-- Canvas creato da JS in app.js -->
+            <!-- Canvas creato da JS -->
             <div id="loading" class="absolute inset-0 flex items-center justify-center bg-slate-950/80 z-10 text-lg">
                 <span class="animate-pulse">Caricamento dati in corso...</span>
             </div>
@@ -125,7 +126,7 @@
 
     </div>
 
-    <!-- Script principale -->
-    <script src="app.js"></script>
+    <!-- Script principale (ES6 Module) -->
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>
