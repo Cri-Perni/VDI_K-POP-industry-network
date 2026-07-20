@@ -9,9 +9,7 @@
     <!-- D3.js v7 -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
-        /* Stile per evitare che il testo sia selezionabile durante il drag */
-        .node text { pointer-events: none; font-size: 11px; }
-        .link { stroke-opacity: 0.6; stroke-width: 1.5px; }
+        canvas { display: block; }
     </style>
 </head>
 <body class="bg-slate-900 text-slate-100 font-sans h-screen flex flex-col overflow-hidden">
@@ -109,7 +107,7 @@
 
         <!-- Area del Grafo -->
         <main class="flex-1 relative bg-slate-950" id="canvas-container">
-            <!-- Il grafo SVG verrà inserito qui da D3 -->
+            <!-- Canvas creato da JS in app.js -->
             <div id="loading" class="absolute inset-0 flex items-center justify-center bg-slate-950/80 z-10 text-lg">
                 <span class="animate-pulse">Caricamento dati in corso...</span>
             </div>
