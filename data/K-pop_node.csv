@@ -300,7 +300,7 @@ id,type,name
 4437,male,Keiichi Hiroishi
 4436,male,Shinya Horaguchi
 4435,male,Keiichi Nakanishi
-4434,male,Toraji Shingū 
+4434,male,Toraji Shingū
 4433,group,Crazy Ken Band
 4432,person,Rick Standley
 4431,person,Brian Schiele
@@ -308,7 +308,7 @@ id,type,name
 4429,person,Juvie Train
 4428,person,Gan-D
 4427,male,Eun Tae-soo
-4426,male,Kang Seong-kyu 
+4426,male,Kang Seong-kyu
 4425,male,Ko Myeong-won
 4424,male,Moon Chang-hwan
 4423,male,Jang Seong-kyu
@@ -356,9 +356,9 @@ id,type,name
 4381,male,Son Il-Kwon
 4380,female,Akiko Wada
 4379,male,Jack the Knife
-4378,male,Roy 
+4378,male,Roy
 4377,male,Eddie Tarantula
-4376,male,Tiger 
+4376,male,Tiger
 4375,female,Velvet Geena
 4374,male,Kim Young-Woo
 4373,male,Song Woo-Jin
@@ -371,7 +371,6 @@ id,type,name
 4366,group,Crystal Kay×CHEMISTRY
 4365,group,CHEMISTRY
 4364,female,TRINITY
-4363,female,Miso
 4362,female,Dahee
 4361,female,ZINNI
 4360,female,Park Jiyeon
@@ -419,7 +418,6 @@ id,type,name
 4318,female,Lulu
 4317,female,"An, Yoo-Jin"
 4316,male,E-Gu
-4315,male,The One
 4314,female,Kang Ji-yeon
 4313,female,Kim Hyeon-jeong
 4312,female,Do Ha-rin
@@ -502,7 +500,6 @@ id,type,name
 4235,female,Hwang Hyun-Jin
 4234,female,Seyeon
 4233,female,Jiyoung
-4232,female,Taeyeon
 4231,female,Jinah
 4230,female,Miso
 4229,female,Jinhee
@@ -545,7 +542,6 @@ id,type,name
 4192,person,JACE
 4191,person,겨자맛딸기
 4190,person,레이디스
-4189,person,김영훈
 4188,person,김진우
 4187,person,황성진
 4186,person,이근수
@@ -574,7 +570,6 @@ id,type,name
 4163,person,윤수일
 4162,person,블랙백
 4161,person,서드스톤
-4160,person,이부영
 4159,person,전상환
 4158,person,홍지혜
 4157,person,비행기
@@ -590,7 +585,6 @@ id,type,name
 4147,person,브랜뉴데이
 4146,person,Deanna Yong Hendrickson
 4145,person,보이스코
-4144,person,김지연
 4143,person,코발트블루
 4142,person,티니
 4141,person,네이키드 걸스
@@ -686,7 +680,6 @@ id,type,name
 4051,group,고고스타
 4050,person,나비효과
 4049,person,우리는 속옷도 생겼고 여자도 늘었다네
-4048,person,박상훈
 4047,person,이태권
 4046,group,미스 에스
 4045,person,해피 체어
@@ -718,7 +711,6 @@ id,type,name
 4019,person,이수진
 4018,person,박다예
 4017,person,정우용
-4016,person,정재환
 4015,person,정민준
 4014,male,배성우
 4013,person,스팟라이트
@@ -805,7 +797,6 @@ id,type,name
 3932,person,박학기
 3931,person,이중원
 3930,person,김주현
-3929,person,양혜승
 3928,person,임창빈
 3927,person,하비 누아주
 3926,person,정광채
@@ -879,7 +870,6 @@ id,type,name
 3858,person,김한준
 3857,person,Aile
 3856,person,나희경
-3855,person,임선영
 3854,group,에이팝
 3853,person,윤건혁
 3852,person,김혜지
@@ -954,9 +944,7 @@ id,type,name
 3783,person,이대용
 3782,person,김혜원
 3781,person,량현량하
-3780,person,노민우
 3779,person,조광민
-3778,person,노민우
 3777,person,베베 미뇽
 3776,person,신치림
 3775,person,SAGA
@@ -1037,7 +1025,6 @@ id,type,name
 3700,person,박영철
 3699,person,이소민
 3698,person,이덕진
-3697,person,김윤정
 3696,person,코인록커보이즈
 3695,person,트랜스픽션
 3694,person,전호진
@@ -1096,7 +1083,6 @@ id,type,name
 3641,person,이정석
 3640,person,김미희
 3639,group,페이션츠
-3638,person,김소리
 3637,person,백소영
 3636,person,이지아
 3635,group,치치
@@ -1160,7 +1146,6 @@ id,type,name
 3577,person,이기욱
 3576,person,오연경
 3575,person,한나연
-3574,person,김환
 3573,person,오세훈
 3572,person,오창훈
 3571,person,다 크루
@@ -1655,7 +1640,6 @@ id,type,name
 3082,male,Tongdal Jo
 3081,female,Patti Kim
 3080,group,Every Single Day
-3079,group,Kingston Rudieska
 3078,female,Ja-ok Kim
 3077,male,Kim Jung-woo
 3076,group,Sim Soo-bong
@@ -1678,7 +1662,6 @@ id,type,name
 3059,group,Lucid Fall
 3058,group,Vanilla Unity
 3057,female,Ku Hye-sun
-3056,group,Tahiti
 3055,female,Kyeon Mi-ri
 3054,female,Yoon Son-ha
 3053,group,From The Airport
@@ -1767,7 +1750,6 @@ id,type,name
 2970,male,Shin-won Park
 2969,group,Amadéus Leopold
 2968,male,Mu-yeol Kim
-2967,group,C-REAL
 2966,female,Hyun-hwa Kwak
 2965,group,神飞乐团
 2964,group,Sue Son
@@ -1786,7 +1768,6 @@ id,type,name
 2951,male,Hyun-woo Lee
 2950,male,Louis
 2949,group,Kiha Chang
-2948,group,Blady
 2947,group,Meilin
 2946,group,So-jung Kim
 2945,group,Ga-yeoul Chu
@@ -1824,7 +1805,6 @@ id,type,name
 2913,group,Young-hu Kim
 2912,group,Minho
 2911,group,Togeworl
-2910,group,SM the Performance
 2909,group,Chunja (춘자)
 2908,group,H-Eugene
 2907,male,Noh Hong-chul
@@ -1857,7 +1837,6 @@ id,type,name
 2880,female,Yull
 2879,female,Lime
 2878,person,Nasty Nasty
-2877,male,Kevin
 2876,male,Hyung Sik
 2875,male,Hwang Kwanghee
 2874,male,Min Woo
@@ -1959,11 +1938,9 @@ id,type,name
 2778,male,오원빈
 2777,male,Song Seung-hyun
 2776,male,Choi Min-hwan
-2775,male,Lee Jae-jin
 2774,male,Choi Jong-hoon
 2773,male,Hyeongkon
 2772,male,Jaehyung
-2771,male,Sungmin
 2770,male,Seungjin
 2769,male,Yunyoung
 2768,male,Hyojun
@@ -2006,7 +1983,6 @@ id,type,name
 2731,male,Wang Jia Er
 2730,male,Pyo Jihoon
 2729,male,Cho Jin-Ho
-2728,male,L.Joe
 2727,male,Kim Sung Soo
 2726,person,Yijung
 2725,person,Jaeho
@@ -2022,9 +1998,9 @@ id,type,name
 2715,male,Neo
 2714,male,Ryan
 2713,male,Jr.
-2712,male,Kim Dong-hyun 
-2711,male,Jung Sung-hak 
-2710,male,Kim Rae-hwan 
+2712,male,Kim Dong-hyun
+2711,male,Jung Sung-hak
+2710,male,Kim Rae-hwan
 2709,male,Lee Young-jun
 2708,male,Oh Kwang-suk
 2707,female,Joo Eun-young
@@ -2046,8 +2022,6 @@ id,type,name
 2691,female,Lee Yeong Hyeon
 2690,female,Shin Yeon Ah
 2689,male,Kim Sang-bae
-2688,female,Sojung
-2687,female,GilMe
 2686,male,Tyfoon
 2685,male,Kim Yongseok
 2684,male,Kim Sangmin
@@ -2082,19 +2056,17 @@ id,type,name
 2655,male,Cha Seung Min
 2654,male,Bbaek Ga
 2653,female,Shin Ji
-2652,male,Kim Jong-min
 2651,female,Misty
 2650,female,Hee Young
 2649,female,Jung Hye Min
 2648,female,Gun Ji
-2647,female,Jenny 
+2647,female,Jenny
 2646,female,Si Hyun
 2645,male,Richard Kim
 2644,male,Kim Soo Yoon
 2643,male,Kim Moon Chul
 2642,male,James Lee
 2641,male,Maru
-2640,male,Kang Doo
 2639,person,Sejoon
 2638,female,Nayeon
 2637,person,Jongkook
@@ -2179,9 +2151,6 @@ id,type,name
 2558,group,Solaa
 2557,group,Star City
 2556,group,The Footsouljahs
-2555,female,Way
-2554,female,Cho A
-2553,female,Ellin
 2552,female,Gum Mi
 2551,group,Mr McFall's Chamber
 2550,male,Chris Kim
@@ -2190,7 +2159,6 @@ id,type,name
 2547,male,Kwon Kwang-jin
 2546,male,Park Yun Hwa
 2545,male,Joo Chan Yang
-2544,male,Kim Joon
 2543,male,Park Han Bi
 2542,male,Shin Min Chul
 2541,person,Seong Gon Kim
@@ -2267,14 +2235,11 @@ id,type,name
 2470,female,Yeo-eun
 2469,male,Hyuk
 2468,male,Hongbin
-2467,male,Ravi
-2466,male,Leo
 2465,male,N
 2464,female,Yooyoung
-2463,female,Lime
 2462,female,Shin Yoon-jo
 2461,female,Kwon Nara
-2460,male, Yoon Jeong-oh 
+2460,male,Yoon Jeong-oh
 2459,male,Jerry
 2458,male,Red
 2457,male,Haru
@@ -2287,20 +2252,18 @@ id,type,name
 2450,male,Hoik
 2449,male,Kimchi
 2448,male,Woosang
-2447,male,Aoora
 2446,female,Sunga
 2445,female,Minha
 2444,female,Hyemi
 2443,female,Kyungri
 2442,female,Eunji
-2441,female,Hyuna
 2440,female,Sera
 2439,female,Euaerin
 2438,female,Lee Sem
 2437,group,Buga Kingz
-2436,male,Park Hyeong-Jin 
+2436,male,Park Hyeong-Jin
 2435,male,Park Joon-Hyung
-2434,male,Dong Woo-Seok 
+2434,male,Dong Woo-Seok
 2433,male,Park Geon-Woo
 2432,male,Kim Jong-Hyo
 2431,female,Na Hae Ryeong
@@ -2323,7 +2286,6 @@ id,type,name
 2414,person,Eastern sidekick
 2413,group,Swingz
 2412,female,A-hyun Seo
-2411,group,Urajil Band
 2410,male,Huh Jung-Min
 2409,male,Jeon Min-Hyuk
 2408,male,Jae Yoon
@@ -2336,7 +2298,6 @@ id,type,name
 2401,female,Choi Jin-ah
 2400,group,TaLES
 2399,group,p.o.m
-2398,group,Arie Band
 2397,female,Arie Kim
 2396,group,Arie Band
 2395,person,Eunjung Bae
@@ -2349,7 +2310,6 @@ id,type,name
 2388,group,뻥크BAND
 2387,group,SlushPuppy
 2386,group,비시누
-2385,group,Rubber Duckie
 2384,female,Ji-a Song
 2383,group,Rubber Duckie
 2382,male,Park Keon-Woo
@@ -2366,10 +2326,8 @@ id,type,name
 2371,person,이석원
 2370,person,Lee Neung-Ryong
 2369,group,Onnine Ibalgwan
-2368,male,Ha Sebin
 2367,group,Oh! Brothers
 2366,male,Lee Jung Hoon
-2365,group,Nemesis
 2364,male,Ha Sebin
 2363,group,Nemesis
 2362,male,Lee Hyun
@@ -2381,7 +2339,6 @@ id,type,name
 2356,female,Hwang Hye-young
 2355,group,Two Two
 2354,male,Kim Ji Hoon
-2353,group,Two Two
 2352,group,PARAN
 2351,male,Lee Kiseop
 2350,group,Xing
@@ -2389,7 +2346,6 @@ id,type,name
 2348,female,JeA
 2347,female,Min Hyo-rin
 2346,female,SunMin
-2345,female,Jeon Hye-bin
 2344,male,Dong-Ha Chae
 2343,male,Lee Seok Hoon
 2342,male,Kim Jin Ho
@@ -2397,7 +2353,7 @@ id,type,name
 2340,male,Shin Jung-hwan
 2339,person,Go Young Wook
 2338,female,Kim Ji Hyun
-2337,male,Lee Se-jun 
+2337,male,Lee Se-jun
 2336,male,Park Seung Hwa
 2335,group,Yurisangja
 2334,male,Kang Doo
@@ -2444,7 +2400,6 @@ id,type,name
 2293,female,Lee Harin
 2292,female,Park Soo Jin
 2291,person,NRG
-2290,female,Lee Ji Yeon
 2289,male,Jang Jin Young
 2288,male,Shim Jae Won
 2287,male,Jung Ji Hoon
@@ -2468,7 +2423,6 @@ id,type,name
 2269,female,Go Ara
 2268,male,No Min-woo
 2267,male,"Kim ""X-Mas"" Jung Mo"
-2266,group,Super Junior-K.R.Y.
 2265,group,Anyband
 2264,group,m-flo♥BoA
 2263,group,KODA KUMI & BoA
@@ -2480,7 +2434,6 @@ id,type,name
 2257,male,Jaejoong
 2256,group,SM The Performance
 2255,group,DBSK
-2254,male,Sonstar
 2253,male,Yaenhead
 2252,female,Lee Min
 2251,female,Chae Da-hee
@@ -2490,7 +2443,6 @@ id,type,name
 2247,female,Oh Min Jin
 2246,female,Hwang Yeon Kyoung
 2245,female,Yang Eun Ji
-2244,group,Baby Vox Re.V
 2243,female,An Jin Kyoung
 2242,group,Baby Vox Re.V
 2241,male,Jeong Jae Yong
@@ -2500,7 +2452,6 @@ id,type,name
 2237,female,Ahyul
 2236,female,Songha
 2235,female,Riwon
-2234,female,Jiwon
 2233,female,Lani
 2232,female,Rika
 2231,female,Rahi
@@ -2582,7 +2533,6 @@ id,type,name
 2155,female,NC.A
 2154,female,Kahi
 2153,male,"Kim, Gun Mo"
-2152,male,Ken
 2151,female,BMK
 2150,female,"Kim, Wonjung"
 2149,female,"Lee, Joo-bin"
@@ -2655,7 +2605,6 @@ id,type,name
 2082,female,Noian
 2081,male,Masta Wu
 2080,female,Cheetah
-2079,male,Minos
 2078,female,"Park, Hwa Yobi"
 2077,female,"Baek, Ga-Young"
 2076,male,"Kye, Bum Zu"
@@ -2666,7 +2615,6 @@ id,type,name
 2071,male,"Yoon, Doo-Joon"
 2070,person,Flow.D
 2069,male,Fana
-2068,female,Bora
 2067,male,"Ock, Yohan"
 2066,male,Hoon
 2065,female,Shin Youngok
@@ -2718,7 +2666,6 @@ id,type,name
 2019,male,Ugly Duck
 2018,male,Dongwoo
 2017,male,"Lee, Dong-Hoon"
-2016,male,"Lee, Jang-woo"
 2015,male,Ryu
 2014,male,Soul Fish
 2013,female,Vicky
@@ -2786,7 +2733,6 @@ id,type,name
 1951,male,"Son, Jin-Tae"
 1950,male,마리오
 1949,male,Taemin
-1948,female,Wendy
 1947,female,Dara
 1946,male,J.Slow
 1945,female,"Woo, Hyelim"
@@ -2862,7 +2808,6 @@ id,type,name
 1875,person,Ryuji
 1874,male,Outsider
 1873,female,Narmia
-1872,female,Cho A
 1871,male,"Pumkin, DJ"
 1870,male,"Horvejkul, Nichkhun Buck"
 1869,male,Lil Boi
@@ -3116,7 +3061,6 @@ id,type,name
 1621,female,Pika
 1620,female,Zuny
 1619,male,Eun-Joon
-1618,male,Alex
 1617,female,"Bae, Sandra"
 1616,male,Gongchan
 1615,male,"Lee, Tae-min"
@@ -3145,7 +3089,6 @@ id,type,name
 1592,male,"Jung, Soon-Yong"
 1591,male,"Kwon, Kwang Jin"
 1590,person,"Uh, Yong-Soo"
-1589,female,Jiyeon
 1588,female,"Lee, Hye-Ri"
 1587,person,Dawny
 1586,female,Dasom
@@ -3209,7 +3152,6 @@ id,type,name
 1528,person,"Kim, Min Ji"
 1527,female,"Sunwoo, Jung-A"
 1526,person,NaBi
-1525,male,Eric
 1524,female,Solji
 1523,female,J.Min
 1522,male,"Yoon, Do-Hyun"
@@ -3307,7 +3249,6 @@ id,type,name
 1430,person,Yearam
 1429,male,"Kim, Hyun-Chul"
 1428,male,"Jung, Joon-ho"
-1427,female,"Kim, Yuna"
 1426,male,"Chung, Won Young"
 1425,male,Kevin
 1424,female,Sowon
@@ -3487,7 +3428,6 @@ id,type,name
 1250,female,"Choi, Soo-young"
 1249,female,Min
 1248,male,"Park, Soo-Il"
-1247,male,"Jang, Sung-Woon"
 1246,person,"Ahn, Bok-Jin"
 1245,person,"Kim, Ki-Bum"
 1244,male,"Park, Yoon-Sik"
@@ -3581,7 +3521,6 @@ id,type,name
 1156,male,"Lee, Chang-hyeon"
 1155,female,Wataame
 1154,female,"Kang, Ji Young"
-1153,female,Sunny
 1152,male,Kang Ta
 1151,male,"Kim, David"
 1150,female,Jiyeon
@@ -3610,7 +3549,6 @@ id,type,name
 1127,male,Leeteuk
 1126,male,"Tukutz, DJ"
 1125,person,"Song, Kwang Sik"
-1124,male,Bobby
 1123,female,"Kim, Hyo-Soo"
 1122,male,"Jo, Young-wook"
 1121,female,"Jo, Hyuna"
@@ -3713,7 +3651,6 @@ id,type,name
 1024,male,"Kim, Yong-Rin"
 1023,person,T'ache
 1022,female,"Lim, Jeong Hee"
-1021,male,Kai
 1020,female,Karea
 1019,male,제이준
 1018,female,"Jeong, SooNyun"
@@ -4203,7 +4140,6 @@ id,type,name
 534,group,Seo Taiji & Boys
 533,group,Heart Shake
 532,group,필베이
-531,group,UNIQ
 530,group,a s blue
 529,group,Bluedawn
 528,group,라즈베리 필드
@@ -4254,7 +4190,6 @@ id,type,name
 483,group,Davichi
 482,group,Dark Ambition
 481,group,harrybigbutton
-480,group,4TEN
 479,group,Dopesun & LogicX
 478,group,Click-B
 477,group,Pinodyne
@@ -4383,7 +4318,6 @@ id,type,name
 354,group,JTL
 353,group,TOXIC
 352,group,Central Noise
-351,group,Secret
 350,group,Bangtan Boys
 349,group,Brave Guys
 348,group,After School
@@ -4391,7 +4325,6 @@ id,type,name
 346,group,Younique Unit
 345,group,soundTeMP
 344,group,COED School
-343,group,RUX
 342,group,Seventeen
 341,group,Urban Zakapa
 340,group,Galaxy Express
@@ -4442,7 +4375,6 @@ id,type,name
 295,group,SamulNori
 294,group,GD&TOP
 293,group,Incheon City Chorale
-292,group,LEGEND
 291,group,Eutteugeottasi
 290,group,T.S.T
 289,group,Girl2School
@@ -4467,7 +4399,6 @@ id,type,name
 270,group,Guckkasten
 269,group,Girl Friends
 268,group,we hate jh
-267,group,BeBop
 266,group,밤의 회개
 265,group,Legend
 264,group,FameUs
@@ -4505,7 +4436,6 @@ id,type,name
 232,group,Wings
 231,group,SMTOWN
 230,group,Clazziquai Project
-229,group,Clon
 228,group,Super Junior-T
 227,group,Supernova
 226,group,FlaShe
@@ -4574,7 +4504,6 @@ id,type,name
 163,group,JQT
 162,group,Heritage
 161,group,Cats
-160,group,PIA
 159,group,Origin of Plague
 158,group,Goldmund
 157,group,Clon
@@ -4597,7 +4526,6 @@ id,type,name
 140,group,Funny Powder
 139,group,Chamsonyeo
 138,group,Dear Cloud
-137,group,BOYFRIEND
 136,group,Glossy
 135,group,Super Junior-K.R.Y.
 134,group,mellowyear
@@ -4669,7 +4597,6 @@ id,type,name
 68,group,티라미스
 67,group,Swi.T
 66,group,bikiny
-65,group,Stellar
 64,group,S.I.D-Sound
 63,group,Xenos-5
 62,group,Turtles
