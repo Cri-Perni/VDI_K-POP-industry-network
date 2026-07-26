@@ -1,27 +1,27 @@
-# Documento Tecnico — K-Pop Network Analysis
+# Technical Document — K-Pop Network Analysis
 
-> Questo documento descrive in dettaglio ogni tecnologia, algoritmo e scelta progettuale del progetto. Pensato per rispondere a domande tecniche durante l'esame.
+> This document details every technology, algorithm, and design choice of the project. It is intended to answer technical questions during the exam/review.
 
 ---
 
-## Indice
+## Table of Contents
 
-1. [Tecnologie Utilizzate](#1-tecnologie-utilizzate)
+1. [Technologies Used](#1-technologies-used)
 2. [D3.js — Force Simulation](#2-d3js--force-simulation)
 3. [Canvas 2D API](#3-canvas-2d-api)
 4. [Vanilla JavaScript ES6](#4-vanilla-javascript-es6)
 5. [Tailwind CSS](#5-tailwind-css)
-6. [Algoritmi e Strutture Dati](#6-algoritmi-e-strutture-dati)
-7. [Pattern Architetturali](#7-pattern-architetturali)
-8. [Ottimizzazioni Performance](#8-ottimizzazioni-performance)
-9. [Glossario Tecnico](#9-glossario-tecnico)
-10. [Possibili Domande d'Esame](#10-possibili-domande-desame)
+6. [Algorithms and Data Structures](#6-algorithms-and-data-structures)
+7. [Architectural Patterns](#7-architectural-patterns)
+8. [Performance Optimizations](#8-performance-optimizations)
+9. [Technical Glossary](#9-technical-glossary)
+10. [Possible Exam Questions](#10-possible-exam-questions)
 
 ---
 
-## 1. Tecnologie Utilizzate
+## 1. Technologies Used
 
-### Stack complessivo
+### Overall Stack
 
 ```
 ┌──────────────────────────────────────────────┐
@@ -29,137 +29,137 @@
 │  ┌────────────────────────────────────────┐   │
 │  │            Canvas 2D API               │   │  ← Rendering
 │  ├────────────────────────────────────────┤   │
-│  │         D3.js Force Simulation         │   │  ← Fisica/Layout
+│  │         D3.js Force Simulation         │   │  ← Physics/Layout
 │  ├────────────────────────────────────────┤   │
-│  │          Vanilla JavaScript ES6        │   │  ← Logica applicativa
+│  │          Vanilla JavaScript ES6        │   │  ← Application Logic
 │  ├────────────────────────────────────────┤   │
-│  │       Tailwind CSS (CDN v4)            │   │  ← Stili UI
+│  │       Tailwind CSS (CDN v4)            │   │  ← UI Styling
 │  ├────────────────────────────────────────┤   │
-│  │             HTML5 / DOM                │   │  ← Struttura pagina
+│  │             HTML5 / DOM                │   │  ← Page Structure
 │  └────────────────────────────────────────┘   │
 └──────────────────────────────────────────────┘
 ```
 
 ### 1.1 D3.js v7 (Data-Driven Documents)
 
-| Aspetto | Dettaglio |
+| Aspect | Detail |
 |---|---|
-| **Versione** | 7.x (caricata da CDN: `d3js.org/d3.v7.min.js`) |
-| **Ruolo nel progetto** | Motore di simulazione force-directed per il calcolo delle posizioni dei nodi |
-| **Moduli usati** | `d3-force` (simulazione fisica), `d3-dsv` (parsing CSV), `d3-selection` (non più usato dopo migrazione Canvas) |
-| **Licenza** | ISC |
+| **Version** | 7.x (loaded via CDN: `d3js.org/d3.v7.min.js`) |
+| **Role in the project** | Force-directed simulation engine for calculating node positions |
+| **Modules used** | `d3-force` (physics simulation), `d3-dsv` (CSV parsing), `d3-selection` (no longer used after Canvas migration) |
+| **License** | ISC |
 
-**Cosa fa D3.js in questo progetto:**
+**What D3.js does in this project:**
 
-D3.js viene utilizzato esclusivamente per il **calcolo delle posizioni** dei nodi tramite il modulo `d3-force`. Il rendering non usa più D3 (dopo la migrazione da SVG a Canvas), ma la simulazione fisica è rimasta in D3 perché è matura, performante e ben documentata.
+D3.js is used exclusively for **calculating positions** of nodes using the `d3-force` module. Rendering no longer uses D3 (after migrating from SVG to Canvas), but the physics simulation remains in D3 because it is mature, highly performant, and well-documented.
 
-**Moduli specifici:**
-- **`d3.forceSimulation()`** — Crea il motore fisico che gestisce il ciclo di tick
-- **`d3.forceLink()`** — Gestisce le forze elastiche tra nodi collegati da archi
-- **`d3.forceManyBody()`** — Gestisce la repulsione/attrazione tra tutti i nodi (algoritmo Barnes-Hut)
-- **`d3.forceCenter()`** — Forza centripeta che mantiene il grafo centrato nel canvas
-- **`d3.forceCollide()`** — Previene la sovrapposizione tra nodi
-- **`d3.csv()`** — Funzione per il parsing di file CSV
+**Specific modules:**
+- **`d3.forceSimulation()`** — Creates the physics engine that manages the tick cycle.
+- **`d3.forceLink()`** — Manages elastic forces between nodes connected by edges.
+- **`d3.forceManyBody()`** — Manages repulsion/attraction between all nodes (Barnes-Hut algorithm).
+- **`d3.forceCenter()`** — Centripetal force that keeps the graph centered in the canvas.
+- **`d3.forceCollide()`** — Prevents node overlaps.
+- **`d3.csv()`** — Function for parsing CSV files.
 
 ```js
-this.simulation = d3.forceSimulation()          // ← Crea il motore
-    .force("link", d3.forceLink()               // ← Forza elastica degli archi
-        .id(d => d.id)                          // ← Come risolvere gli ID nei dati
-        .distance(CONFIG.forces.linkDistance))  // ← Lunghezza ideale
-    .force("charge", d3.forceManyBody()         // ← Repulsione tra nodi
+this.simulation = d3.forceSimulation()          // ← Creates the engine
+    .force("link", d3.forceLink()               // ← Elastic force of edges
+        .id(d => d.id)                          // ← How to resolve IDs in the data
+        .distance(CONFIG.forces.linkDistance))  // ← Ideal length
+    .force("charge", d3.forceManyBody()         // ← Repulsion between nodes
         .strength(CONFIG.forces.chargeStrength))
-    .force("center", d3.forceCenter(w, h))      // ← Centraggio
-    .force("collision", d3.forceCollide()       // ← Anti-sovrapposizione
+    .force("center", d3.forceCenter(w, h))      // ← Centering
+    .force("collision", d3.forceCollide()       // ← Anti-overlapping
         .radius(CONFIG.forces.collisionRadius));
 ```
 
 ### 1.2 Canvas 2D API
 
-| Aspetto | Dettaglio |
+| Aspect | Detail |
 |---|---|
-| **Specifica** | HTML5 Canvas 2D Context (W3C) |
-| **Ruolo** | Rendering di nodi, archi, etichette e highlight interattivi |
-| **Vantaggio chiave** | Rendering accelerato via GPU, nessun DOM overhead |
+| **Specification** | HTML5 Canvas 2D Context (W3C) |
+| **Role** | Rendering of nodes, edges, labels, and interactive highlights |
+| **Key Advantage** | GPU-accelerated rendering, zero DOM overhead |
 
-**Metodi Canvas utilizzati nel progetto:**
+**Canvas methods used in the project:**
 
-| Metodo | Utilizzo |
+| Method | Usage |
 |---|---|
-| `ctx.setTransform(a,b,c,d,e,f)` | Imposta la trasformazione iniziale (HiDPI scaling) |
-| `ctx.clearRect(x,y,w,h)` | Pulisce il canvas a ogni frame |
-| `ctx.save()` / `ctx.restore()` | Salva/ripristina lo stato del contesto grafico |
-| `ctx.translate(tx, ty)` | Applica pan della visuale |
-| `ctx.scale(k, k)` | Applica zoom della visuale |
-| `ctx.fillRect()` | Disegna lo sfondo |
-| `ctx.arc(x, y, r, start, end)` | Disegna cerchi (nodi e highlight ring) |
-| `ctx.moveTo()` / `ctx.lineTo()` / `ctx.stroke()` | Disegna linee (archi) |
-| `ctx.fillText()` | Disegna etichette testuali |
-| `ctx.beginPath()` / `ctx.closePath()` | Definisce percorsi di disegno |
-| `ctx.globalAlpha` | Controlla l'opacità (selezione/hover/search highlight) |
-| `ctx.fillStyle` / `ctx.strokeStyle` | Colori di riempimento e contorno |
+| `ctx.setTransform(a,b,c,d,e,f)` | Sets the initial transformation (HiDPI scaling) |
+| `ctx.clearRect(x,y,w,h)` | Clears the canvas on every frame |
+| `ctx.save()` / `ctx.restore()` | Saves/restores the state of the graphic context |
+| `ctx.translate(tx, ty)` | Applies viewport pan |
+| `ctx.scale(k, k)` | Applies viewport zoom |
+| `ctx.fillRect()` | Draws the background |
+| `ctx.arc(x, y, r, start, end)` | Draws circles (nodes and highlight rings) |
+| `ctx.moveTo()` / `ctx.lineTo()` / `ctx.stroke()` | Draws lines (edges) |
+| `ctx.fillText()` | Draws text labels |
+| `ctx.beginPath()` / `ctx.closePath()` | Defines drawing paths |
+| `ctx.globalAlpha` | Controls opacity (selection/hover/search highlight) |
+| `ctx.fillStyle` / `ctx.strokeStyle` | Fill and contour colors |
 
 **HiDPI / Retina display:**
 
 ```js
 const dpr = window.devicePixelRatio || 1;
-canvas.width = width * dpr;       // ← dimensioni fisiche (pixel reali)
+canvas.width = width * dpr;       // ← physical dimensions (real pixels)
 canvas.height = height * dpr;
-canvas.style.width = width + "px"; // ← dimensioni logiche (CSS)
+canvas.style.width = width + "px"; // ← logical dimensions (CSS)
 canvas.style.height = height + "px";
 
 // In draw():
-ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // ← scala tutto
+ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // ← scales everything
 ```
 
-Senza questo accorgimento, su schermi Retina il canvas apparirebbe sgranato (ogni pixel CSS viene mappato a 1 pixel fisico invece di usare i 2-3 pixel fisici disponibili).
+Without this adjustment, the canvas would look pixelated on Retina screens (since each CSS pixel would map to 1 physical pixel instead of utilizing the 2-3 physical pixels available).
 
 ### 1.3 Vanilla JavaScript ES6+
 
-| Aspetto | Dettaglio |
+| Aspect | Detail |
 |---|---|
 | **Standard** | ECMAScript 2015+ (ES6, ES7, ES8) |
-| **Nessun framework** | Scelta deliberata per evitare overhead di React/Vue/Angular |
-| **Nessun bundler** | Scelta deliberata: nessun Webpack/Vite/Parcel |
+| **No Framework** | Deliberate choice to avoid React/Vue/Angular overhead |
+| **No Bundler** | Deliberate choice: no Webpack/Vite/Parcel |
 
-**Feature ES6+ utilizzate:**
+**ES6+ Features Used:**
 
-| Feature | Dove | Perché |
+| Feature | Where | Why |
 |---|---|---|
-| **`class`** | Tutto il codice (`class KPopNetworkGraph`) | Organizzazione OOP chiara |
-| **`async/await`** | `initialize()` | Caricamento asincrono dei CSV con codice lineare |
-| **`Promise.all()`** | `initialize()` | Carica nodi e archi IN PARALLELO (non sequenziale) |
-| **Arrow function `() =>`** | Ovunque | `this` lessicale, codice conciso |
-| **`const` / `let`** | Ovunque | Scope a blocco, nessun hoisting |
-| **`Map`** | `this.adjacency`, `nodeTypeMap` | Lookup O(1) con chiavi non-stringa |
-| **`Set`** | `connectedNodeIds`, `searchMatchedIds`, `activeNodeIds` | Insiemi unici con lookup O(1) |
-| **Destructuring** | `const [nodesData, edgesData]` | Estrazione multipla da array |
-| **Template literal** | `` `${count} nodi trovati}` `` | Stringhe con interpolazione |
-| **Optional chaining `?.`** | `this.adjacency.get(s)?.add(t)` | Sicurezza su null/undefined |
-| **`Array.filter()`** | Filtraggio nodi/archi | Crea nuovi array senza mutare gli originali |
-| **`Array.forEach()`** | Iterazione su array | Piu leggibile di `for` tradizionale |
-| **`Array.map()`** | Parsing CSV | Trasformazione array 1:1 |
+| **`class`** | Entire codebase (`class KPopNetworkGraph`) | Clear OOP organization |
+| **`async/await`** | `initialize()` | Asynchronous loading of CSVs with clean linear code |
+| **`Promise.all()`** | `initialize()` | Loads nodes and edges IN PARALLEL (non-sequential) |
+| **Arrow functions `() =>`** | Everywhere | Lexical `this`, concise code |
+| **`const` / `let`** | Everywhere | Block scoping, no hoisting |
+| **`Map`** | `this.adjacency`, `nodeTypeMap` | O(1) lookup with non-string keys |
+| **`Set`** | `connectedNodeIds`, `searchMatchedIds`, `activeNodeIds` | Unique sets with O(1) lookups |
+| **Destructuring** | `const [nodesData, edgesData]` | Extracting multiple values from array |
+| **Template literals** | `` `${count} nodes found}` `` | String interpolation |
+| **Optional chaining `?.`** | `this.adjacency.get(s)?.add(t)` | Safety against null/undefined |
+| **`Array.filter()`** | Filtering nodes/edges | Creates new arrays without mutating the original ones |
+| **`Array.forEach()`** | Iterating over arrays | More readable than traditional `for` loops |
+| **`Array.map()`** | Parsing CSV | 1:1 array transformation |
 
-**Perché nessun framework (React/Vue/Angular):**
+**Why no framework (React/Vue/Angular):**
 
-Il progetto è una **single-page application** con un unico scopo: visualizzare un grafo interattivo. Un framework come React avrebbe introdotto:
-- Overhead di bundle (decine di KB)
-- Virtual DOM (inutile con Canvas, che non ha DOM)
-- Complessità di stato e ciclo di vita
-- Build step obbligatorio (JSX, compilazione)
+The project is a **single-page application** with a single purpose: visualizing an interactive graph. A framework like React would have introduced:
+- Bundle overhead (dozens of KBs)
+- Virtual DOM (useless for Canvas, which has no DOM)
+- State and lifecycle management complexity
+- Mandatory build step (JSX, compilation)
 
-La scelta di Vanilla JS mantiene il progetto **leggero**, **indipendente** e **direttamente eseguibile** (basta un server HTTP statico).
+Choosing Vanilla JS keeps the project **lightweight**, **independent**, and **directly executable** (requiring only a static HTTP server).
 
 ### 1.4 Tailwind CSS v4
 
-| Aspetto | Dettaglio |
+| Aspect | Detail |
 |---|---|
-| **Versione** | 4 (caricata da CDN: `@tailwindcss/browser@4`) |
-| **Ruolo** | Stilizzazione dell'interfaccia utente (sidebar, header, pannello filtri) |
-| **Nessuna build** | Tailwind v4 "browser" compila i CSS al volo via CDN |
+| **Version** | 4 (loaded via CDN: `@tailwindcss/browser@4`) |
+| **Role** | Styling the user interface (sidebar, header, filter panel) |
+| **No Build Step** | Tailwind v4 "browser" compiles CSS on the fly in the browser |
 
-**Come funziona Tailwind CSS:**
+**How Tailwind CSS works:**
 
-Tailwind è un framework **utility-first**: non fornisce componenti pre-costruiti ma classi CSS atomiche che corrispondono a singole proprietà CSS:
+Tailwind is a **utility-first** framework: it doesn't provide pre-built components but rather atomic CSS classes corresponding to individual CSS properties:
 
 ```html
 <div class="bg-slate-800 p-4 rounded-lg border border-slate-700">
@@ -170,46 +170,55 @@ Tailwind è un framework **utility-first**: non fornisce componenti pre-costruit
 </div>
 ```
 
-**Vantaggi:**
-- Nessun file CSS da scrivere e mantenere
-- Design system coerente (colori, spazi, font predefiniti)
-- Responsive design nativo con prefissi `sm:`, `md:`, `lg:`
-- Dark mode nativa (il progetto usa già la palette `slate-*`)
+**Advantages:**
+- No custom CSS files to write and maintain
+- Consistent design system (predefined colors, spacing, and typography)
+- Native responsive design using prefixes like `sm:`, `md:`, `lg:`
+- Native dark mode (the project already uses the `slate-*` palette)
 
-**Svantaggi:**
-- Classi verbose nell'HTML
-- Curva di apprendimento per i nomi delle utility
-- Dimensione del CSS (parzialmente mitigato dalla CDN v4 che serve solo le utility usate)
+**Disadvantages:**
+- Verbose HTML classes
+- Learning curve for utility class names
+- CSS size (partially mitigated by the v4 CDN which only compiles the utility classes actually used)
+
+### 1.5 Versioning: CDN vs Build
+
+| Version | Advantage | Disadvantage |
+|---|---|---|
+| **CDN** (`@tailwindcss/browser`) | Zero configuration required | Larger download footprint |
+| **Build** (`npm install tailwindcss`) | Minimal CSS (unused classes removed) | Requires a build process |
+
+The project uses the **CDN** version to avoid introducing a compilation build step.
 
 ---
 
 ## 2. D3.js — Force Simulation
 
-### 2.1 Cos'è una Force Simulation
+### 2.1 What is a Force Simulation
 
-Una **force simulation** (simulazione a forze) è un algoritmo di **layout di grafi** che assegna forze fisiche ai nodi e lascia che il sistema evolva naturalmente verso uno stato di equilibrio stabile.
+A **force-directed simulation** is a **graph layout** algorithm that assigns physical forces to nodes and allows the system to naturally evolve toward a stable state of equilibrium.
 
 ```
-Concettualmente:
+Conceptually:
                                                 
-    Nodo A ←━━━━━━━ repulsione ━━━━━━━━→ Nodo B
-       │                                      │
-       │                                      │
-    attrazione (link)                      attrazione (link)
-       │                                      │
-       │                                      │
-    Nodo C ←━━━━━━━ repulsione ━━━━━━━━→ Nodo D
+    Node A ←━━━━━━━ repulsion ━━━━━━━━→ Node B
+       │                                     │
+       │                                     │
+    attraction (link)                     attraction (link)
+       │                                     │
+       │                                     │
+    Node C ←━━━━━━━ repulsion ━━━━━━━━→ Node D
                                                 
-    Centro ←━━━━━ attrazione centripeta ━━━━━→ tutti i nodi
+    Center ←━━━━ centripetal attraction ━━━━→ all nodes
 ```
 
-### 2.2 Algoritmo alla base (Barnes-Hut)
+### 2.2 Core Algorithm (Barnes-Hut)
 
-D3.js usa l'algoritmo **Barnes-Hut** per ottimizzare il calcolo delle forze di repulsione tra N nodi.
+D3.js uses the **Barnes-Hut** algorithm to optimize the calculation of repulsion forces between N nodes.
 
-**Senza ottimizzazione (forza bruta):** O(N²) — per ogni nodo, calcola la repulsione con tutti gli altri. Con N=4700 → ~22 milioni di coppie.
+**Without optimization (brute force):** O(N²) — for each node, compute repulsion with all other nodes. For N=4700 → ~22 million pairs.
 
-**Con Barnes-Hut:** O(N log N) — lo spazio viene suddiviso in un **quadtree** (albero di quadranti). Nodi lontani vengono raggruppati e trattati come un unico centro di massa:
+**With Barnes-Hut:** O(N log N) — space is recursively divided into a **quadtree** (an tree of quadrants). Distant nodes are grouped together and treated as a single center of mass:
 
 ```
      ┌──────┬──────┐
@@ -218,149 +227,149 @@ D3.js usa l'algoritmo **Barnes-Hut** per ottimizzare il calcolo delle forze di r
      │  C   │  D   │
      └──────┴──────┘
      
-     Se il nodo X è qui → per calcolare la repulsione:
-     - A, B, C, D sono lontani → si usano come unico punto
-       con massa = somma delle masse del quadrante
-     - Solo i nodi vicini vengono calcolati singolarmente
+     If node X is here → to compute repulsion:
+     - A, B, C, D are far away → they are used as a single point
+       with mass = sum of the masses of the quadrant
+     - Only nearby nodes are calculated individually
 ```
 
-### 2.3 Ciclo di Tick della Simulazione
+### 2.3 Simulation Tick Cycle
 
 ```
-Ogni "tick" (≈ 1/60s):
-     │
-     ▼
-1. Calcola forze su ogni nodo
-   ├── charge: repulsione pairwise (Barnes-Hut)
-   ├── link: molla elastica per archi
-   ├── center: attrazione verso centro
-   └── collide: spinge via nodi sovrapposti
-     │
-     ▼
-2. Aggiorna velocità e posizione
-   ├── vx += forza_x * damping
-   ├── vy += forza_y * damping
+Every "tick" (approx. 1/60s):
+      │
+      ▼
+1. Calculate forces on each node
+   ├── charge: pairwise repulsion (Barnes-Hut)
+   ├── link: elastic spring force for edges
+   ├── center: attraction towards center
+   └── collide: pushes apart overlapping nodes
+      │
+      ▼
+2. Update velocity and position
+   ├── vx += force_x * damping
+   ├── vy += force_y * damping
    ├── x += vx
    └── y += vy
-     │
-     ▼
-3. Decrementa alpha (energia)
+      │
+      ▼
+3. Decrement alpha (energy)
    ├── alpha = alpha * (1 - alphaDecay)  ← default: alphaDecay ≈ 0.0228
-   └── Dopo ≈ 300 tick: alpha < alphaMin → simulazione si ferma
-     │
-     ▼
-4. Chiama il callback .on("tick")
-   └── Questo progetto → draw() su Canvas
+   └── When alpha < alphaMin (after ~300 ticks) → simulation stops
+      │
+      ▼
+4. Fire callback .on("tick")
+   └── In this project → draw() on Canvas
 ```
 
-### 2.4 Parametri della Simulazione
+### 2.4 Simulation Parameters
 
-| Parametro | Default D3 | Valore nel progetto | Effetto |
+| Parameter | Default D3 | Value in Project | Effect |
 |---|---|---|---|
-| `alpha` | 1 | 0.15 (restart) | Energia iniziale. Più alto = più movimento |
-| `alphaMin` | 0.001 | 0.001 (default) | Soglia sotto cui la simulazione si ferma |
-| `alphaDecay` | 0.0228 | 0.0228 (default) | Velocità di decadimento dell'energia |
-| `velocityDecay` | 0.4 | 0.4 (default) | Smorzamento: 1 = nessuno, 0 = istantaneo |
-| `chargeStrength` | -30 | **-80** | Repulsione tra nodi (negativo) |
-| `linkDistance` | 30 | **75** | Lunghezza ideale archi |
-| `collisionRadius` | N/A | **18** | Raggio di collisione |
+| `alpha` | 1 | 0.15 (restart) | Initial energy. Higher = more movement |
+| `alphaMin` | 0.001 | 0.001 (default) | Minimum energy threshold below which simulation stops |
+| `alphaDecay` | 0.0228 | 0.0228 (default) | Decay rate of energy |
+| `velocityDecay` | 0.4 | 0.4 (default) | Damping: 1 = no damping, 0 = instant stop |
+| `chargeStrength` | -30 | **-80** | Repulsion between nodes (negative) |
+| `linkDistance` | 30 | **75** | Ideal edge length |
+| `collisionRadius` | N/A | **18** | Collision radius |
 
-### 2.5 Perché abbiamo ridotto i parametri
+### 2.5 Why We Reduced the Parameters
 
-Con 4700 nodi, i parametri default di D3 causano:
-- **Repulsione forte** (-140 originale) → nodi volano via, ci mettono molto a tornare
-- **Collisione grande** (28) → tanta computazione di collision detection
-- **Energia alta** (0.4) → molti tick prima di stabilizzarsi
+With 4,700 nodes, the default parameters of D3 cause:
+- **Strong repulsion** (-140 originally) → nodes fly away and take a long time to return
+- **Large collision radius** (28) → high computation time for collision detection
+- **High initial energy** (0.4) → many ticks required to stabilize
 
-I nuovi valori (-80 charge, 18 collision, 0.15 alpha) riducono i tick necessari del ~60%.
+The new values (-80 charge, 18 collision, 0.15 alpha) reduce the required ticks by ~60%.
 
-### 2.6 Gestione dei filtri nella simulazione
+### 2.6 Managing Filters in the Simulation
 
-Quando l'utente cambia un filtro:
+When the user toggles a filter:
 
 ```
-      FILTRO OFF (nascondo nodi)
-         │
-         ▼
-   filteredNodes = nodi visibili
-   filteredEdges = archi tra nodi visibili
-         │
-         ▼
-   simulation.nodes(filteredNodes)     ← aggiorna dataset
-   simulation.force("link").links(filteredEdges)
-         │
-         ▼
-   isAddingNodes = false (sto togliendo)
-         │
-         ▼
-   alpha = 0.03 (energia minima)
-   restart() (la simulazione riprende MA con poca energia)
-         │
-         ▼
-   I nodi rimasti si riassestano leggermente
-   ma senza il caos di una ripartenza completa
+      FILTER TOGGLED OFF (nodes hidden)
+                      │
+                      ▼
+    filteredNodes = visible nodes
+    filteredEdges = edges between visible nodes
+                      │
+                      ▼
+    simulation.nodes(filteredNodes)     ← update dataset
+    simulation.force("link").links(filteredEdges)
+                      │
+                      ▼
+    isAddingNodes = false (nodes were removed)
+                      │
+                      ▼
+    alpha = 0.03 (minimal energy)
+    restart() (simulation resumes BUT with low energy)
+                      │
+                      ▼
+    The remaining nodes settle slightly
+    without the chaos of a full high-energy restart
 ```
 
 ---
 
 ## 3. Canvas 2D API
 
-### 3.1 Cos'è Canvas
+### 3.1 What is Canvas
 
-Canvas è un elemento HTML5 che fornisce un'area di disegno bitmap manipolabile via JavaScript. A differenza di SVG (che mantiene un albero DOM di elementi vettoriali), Canvas è **immediato**: si disegna, e l'output è solo pixel. Non c'è un "documento" da interrogare o modificare dopo il disegno.
+Canvas is an HTML5 element that provides a bitmap drawing area manipulated via JavaScript. Unlike SVG (which maintains a DOM tree of vector elements), Canvas is **immediate mode**: you draw, and the output is just pixels. There is no "document structure" to query or modify after rendering.
 
-### 3.2 Canvas vs SVG — Differenze Fondamentali
+### 3.2 Canvas vs SVG — Core Differences
 
-| Caratteristica | SVG | Canvas |
+| Feature | SVG | Canvas |
 |---|---|---|
-| **Modello** | Vettoriale (albero DOM) | Bitmap (pixel) |
-| **Elementi** | Ogni forma è un elemento DOM | Non ci sono elementi, solo pixel |
-| **Eventi** | `onclick`, `onmouseover` per elemento | Devono essere calcolati manualmente |
-| **Rendering** | Lento con molti elementi (ogni elemento è DOM) | Veloce (draw call → GPU) |
-| **Zoom** | Le forme vettoriali restano definite | I pixel si ingrandiscono (bisogna ridisegnare) |
-| **Accessibilità** | Buona (screen reader leggono il DOM) | Scarsa (solo pixel) |
-| **Caso d'uso** | Pochi elementi (< 1000), interattivi | Molti elementi (> 1000), animati |
+| **Model** | Vector (DOM tree) | Bitmap (pixels) |
+| **Elements** | Each shape is a DOM element | No elements, only pixels |
+| **Events** | `onclick`, `onmouseover` per element | Must be calculated manually |
+| **Rendering** | Slow with many elements (each is a DOM node) | Fast (GPU-accelerated draw call) |
+| **Zoom** | Vector shapes stay sharp automatically | Pixels stretch (must redraw at higher scale) |
+| **Accessibility** | Good (screen readers parse the DOM) | Poor (pixels only) |
+| **Use Case** | Few elements (< 1,000), interactive | Many elements (> 1,000), animated |
 
-### 3.3 Pipeline di Rendering
+### 3.3 Rendering Pipeline
 
-Il metodo `draw()` viene eseguito a ogni tick della simulazione e a ogni interazione utente.
+The `draw()` method runs on every tick of the simulation and on every user interaction.
 
 ```
-draw() chiamato
-    │
-    ▼
+draw() called
+     │
+     ▼
 ┌─────────────────────────────────────────┐
-│ 1. ctx.setTransform(dpr,0,0,dpr,0,0)   │  ← Scaling HiDPI
+│ 1. ctx.setTransform(dpr,0,0,dpr,0,0)   │  ← HiDPI scaling
 └─────────────────────────────────────────┘
-    │
-    ▼
+     │
+     ▼
 ┌─────────────────────────────────────────┐
-│ 2. ctx.fillStyle = "#0f172a"            │  ← Sfondo
+│ 2. ctx.fillStyle = "#0f172a"            │  ← Background color
 │    ctx.fillRect(0, 0, W, H)            │
 └─────────────────────────────────────────┘
-    │
-    ▼
+     │
+     ▼
 ┌─────────────────────────────────────────┐
-│ 3. ctx.save()                           │  ← Salva stato
+│ 3. ctx.save()                           │  ← Save state
 │    ctx.translate(tx, ty)               │  ← Zoom/Pan
 │    ctx.scale(k, k)                     │
 └─────────────────────────────────────────┘
-    │
-    ▼
+     │
+     ▼
 ┌─────────────────────────────────────────┐
-│ 4. Calcolo highlightedIds               │  ← Stato highlight
+│ 4. Compute highlightedIds               │  ← Highlight states
 │    (search? selected? hovered?)         │
 └─────────────────────────────────────────┘
-    │
-    ▼
+     │
+     ▼
 ┌─────────────────────────────────────────┐
-│ 5. viewport culling                     │  ← Skip nodi fuori
-│    vp = {x, y, w, h}                   │     schermo
+│ 5. Viewport Culling                     │  ← Skip off-screen
+│    vp = {x, y, w, h}                   │    nodes
 └─────────────────────────────────────────┘
-    │
-    ▼
+     │
+     ▼
 ┌─────────────────────────────────────────┐
-│ 6. for each edge:                       │  ← Archi
+│ 6. For each edge:                       │  ← Edges
 │    ctx.beginPath()                     │
 │    ctx.moveTo(src.x, src.y)            │
 │    ctx.lineTo(tgt.x, tgt.y)            │
@@ -368,50 +377,50 @@ draw() chiamato
 │    ctx.globalAlpha = ...               │
 │    ctx.stroke()                        │
 └─────────────────────────────────────────┘
-    │
-    ▼
+     │
+     ▼
 ┌─────────────────────────────────────────┐
-│ 7. for each node (se in viewport):      │  ← Nodi
+│ 7. For each node (if in viewport):      │  ← Nodes
 │    ctx.beginPath()                     │
 │    ctx.arc(x, y, radius, 0, 2π)        │
 │    ctx.fillStyle = nodeColor           │
 │    ctx.globalAlpha = ...               │
 │    ctx.fill()                          │
-│    Anello highlight se hovered/selected│
+│    Highlight ring if hovered/selected  │
 └─────────────────────────────────────────┘
-    │
-    ▼
+     │
+     ▼
 ┌─────────────────────────────────────────┐
-│ 8. if zoom > 0.4:                       │  ← Label
-│    for each node (se in viewport):      │
+│ 8. If zoom > 0.4:                       │  ← Labels
+│    For each node (if in viewport):      │
 │    ctx.font, ctx.fillText(name)         │
 └─────────────────────────────────────────┘
-    │
-    ▼
+     │
+     ▼
 ┌─────────────────────────────────────────┐
-│ 9. ctx.restore()                        │  ← Ripristina stato
+│ 9. ctx.restore()                        │  ← Restore state
 └─────────────────────────────────────────┘
 ```
 
-### 3.4 Perché il Canvas è più veloce dell'SVG
+### 3.4 Why Canvas is Faster than SVG
 
-**Problema con SVG:**
-Ogni `<circle>`, `<line>`, `<text>` è un nodo del DOM. Il browser deve:
-1. Mantenere l'albero DOM (memoria)
-2. Calcolare il layout (reflow)
-3. Riprodurre i pixel (repaint)
+**Problem with SVG:**
+Each `<circle>`, `<line>`, and `<text>` is a node in the DOM. The browser must:
+1. Maintain the DOM tree (memory overhead)
+2. Compute the layout (reflow)
+3. Rasterize the pixels (repaint)
 
-Con 5000 archi e 4700 nodi: **9700 elementi DOM**. Ogni tick della simulazione modifica `x`, `y`, `x1`, `y1`, `x2`, `y2` di TUTTI questi elementi: il browser esegue 24.700+ assegnazioni di attributi DOM.
+With 5,000 edges and 4,700 nodes, there are **9,700 DOM elements**. Every tick of the simulation modifies the coordinates (`x`, `y`, `x1`, `y1`, `x2`, `y2`) of ALL these elements, resulting in the browser executing 24,700+ DOM attribute assignments.
 
-**Soluzione Canvas:**
-Il Canvas è un singolo elemento `<canvas>` che occupa sempre lo stesso spazio nel DOM. Il contenuto è una **bitmap interna** gestita dalla GPU. Non c'è DOM da aggiornare, non c'è reflow, non c'è repaint. Si chiamano funzioni di disegno (`arc`, `lineTo`, `fillText`) che la GPU esegue direttamente.
+**Canvas Solution:**
+The Canvas is a single `<canvas>` element that always occupies the same position in the DOM. Its content is an **internal bitmap** managed by the GPU. There is no DOM to update, no reflow, and no repaint. We simply call drawing functions (`arc`, `lineTo`, `fillText`) that the GPU executes directly.
 
-### 3.5 Hit Detection su Canvas
+### 3.5 Hit Detection on Canvas
 
-A differenza di SVG (che genera eventi del mouse automaticamente per ogni elemento), Canvas richiede il calcolo manuale della posizione del mouse rispetto agli oggetti disegnati.
+Unlike SVG (which fires mouse events automatically for each element), Canvas requires manual coordinate calculation to determine if the cursor is hovering over an object.
 
 ```js
-// 1. Trasforma coordinate schermo → coordinate mondo
+// 1. Transform screen coordinates → world coordinates
 screenToWorld(e) {
     const rect = this.canvas.getBoundingClientRect();
     return {
@@ -420,14 +429,14 @@ screenToWorld(e) {
     };
 }
 
-// 2. Cerca il nodo più vicino entro un raggio
+// 2. Find the nearest node within a radius
 findNodeAt(wx, wy) {
     let closest = null;
     let minDist = Infinity;
-    for (const n of this.getActiveNodes()) {     // ← O(n) iterazione
+    for (const n of this.getActiveNodes()) {     // ← O(n) iteration
         const dx = n.x - wx;
         const dy = n.y - wy;
-        const dist = dx*dx + dy*dy;              // ← distanza al quadrato
+        const dist = dx*dx + dy*dy;              // ← squared distance
         const threshold = CONFIG.nodeRadii[n.type] + 3;
         if (dist < threshold*threshold && dist < minDist) {
             minDist = dist;
@@ -438,18 +447,18 @@ findNodeAt(wx, wy) {
 }
 ```
 
-Complessità: **O(N)** con N = nodi visibili. Su 4700 nodi, l'operazione richiede ~0.5ms — trascurabile rispetto a 60fps (16.6ms per frame).
+Complexity: **O(N)** where N is the number of active nodes. With 4,700 nodes, this operation takes ~0.5ms, which is negligible at 60fps (16.6ms per frame).
 
 ---
 
 ## 4. Vanilla JavaScript ES6
 
-### 4.1 Classi ES6
+### 4.1 ES6 Classes
 
 ```js
 class KPopNetworkGraph {
     constructor() {
-        // Inizializza lo stato
+        // Initialize state
     }
     
     async initialize() { ... }   // ← async method
@@ -459,9 +468,9 @@ class KPopNetworkGraph {
 }
 ```
 
-A differenza dei costruttori "funzione + prototype" dell'ES5, la sintassi `class` è **zucchero sintattico** che rende il codice più leggibile ma si comporta allo stesso modo sotto il cofano (prototype chain).
+Unlike the "function + prototype" constructor syntax of ES5, the `class` keyword is **syntactic sugar** that makes code cleaner but behaves the same under the hood (prototype chain).
 
-### 4.2 Async/Await e Promise.all
+### 4.2 Async/Await and Promise.all
 
 ```js
 async initialize() {
@@ -470,47 +479,47 @@ async initialize() {
             d3.csv(CONFIG.paths.nodes),   // ← Promise 1
             d3.csv(CONFIG.paths.edges)    // ← Promise 2
         ]);
-        // Entrambi i CSV sono caricati
+        // Both CSVs loaded successfully
     } catch (error) {
-        // Gestione errore
+        // Error handling
     }
 }
 ```
 
-**Promise.all** lancia entrambe le richieste in parallelo e attende che TUTTE siano completate. Senza `Promise.all`, dovremmo fare:
+**Promise.all** fires both requests in parallel and waits for ALL of them to resolve. Without `Promise.all`, we would do:
 
 ```js
-const nodesData = await d3.csv(path1);  // ← aspetta 100ms
-const edgesData = await d3.csv(path2);  // ← poi aspetta altri 100ms
-// TOTALE: 200ms
+const nodesData = await d3.csv(path1);  // ← waits 100ms
+const edgesData = await d3.csv(path2);  // ← then waits another 100ms
+// TOTAL: 200ms
 ```
 
-Con `Promise.all`:
+With `Promise.all`:
 ```js
-// Lancia entrambe subito
-// TOTALE: ~100ms (la più lenta delle due)
+// Launches both immediately
+// TOTAL: ~100ms (equal to the slowest of the two)
 ```
 
-### 4.3 Map e Set
+### 4.3 Map and Set
 
-**Map** è una struttura dati chiave-valore che permette qualsiasi tipo di chiave (non solo stringhe):
+A **Map** is a key-value data structure that allows any type of key (not just strings):
 
 ```js
-// Mappa per lookup O(1) del tipo di nodo
+// Map for O(1) lookup of node types
 const nodeTypeMap = new Map(
     this.globalNodes.map(n => [n.id, n.type])
 );
-// Uso: nodeTypeMap.get("NCT_127") → "group"
+// Usage: nodeTypeMap.get("NCT_127") → "group"
 ```
 
-**Set** è un insieme di valori unici:
+A **Set** represents a collection of unique values:
 
 ```js
 const activeNodeIds = new Set(filteredNodes.map(n => n.id));
-// Uso: activeNodeIds.has("NCT_127") → true/false
+// Usage: activeNodeIds.has("NCT_127") → true/false
 ```
 
-Entrambi hanno operazioni **O(1)** (= tempo costante, indipendentemente dalla dimensione). Un array equivalente richiederebbe O(N) per la ricerca.
+Both structures provide **O(1)** operations (constant time, regardless of the dataset size). An equivalent array would require O(N) linear time for searches.
 
 ### 4.4 Optional Chaining
 
@@ -518,7 +527,7 @@ Entrambi hanno operazioni **O(1)** (= tempo costante, indipendentemente dalla di
 this.adjacency.get(s)?.add(t);
 ```
 
-Equivalente a:
+Equivalent to:
 
 ```js
 const set = this.adjacency.get(s);
@@ -527,15 +536,15 @@ if (set !== undefined && set !== null) {
 }
 ```
 
-Previene errori `Cannot read property 'add' of undefined` quando un nodo non esiste nella mappa (dati mancanti o IDs inesistenti nei CSV).
+Prevents `Cannot read property 'add' of undefined` errors when a node does not exist in the map (e.g. because of missing or incorrect data in the CSV files).
 
 ---
 
 ## 5. Tailwind CSS
 
-### 5.1 Cos'è e come funziona
+### 5.1 What it is and How it Works
 
-Tailwind CSS è un framework **utility-first**. Invece di scrivere CSS custom:
+Tailwind CSS is a **utility-first** CSS framework. Instead of writing custom CSS rules:
 
 ```css
 .my-button {
@@ -546,61 +555,61 @@ Tailwind CSS è un framework **utility-first**. Invece di scrivere CSS custom:
 }
 ```
 
-Si usano classi predefinite nell'HTML:
+Predefined classes are applied directly in the HTML:
 
 ```html
 <button class="bg-slate-800 px-4 py-2 rounded-md text-slate-200">
 ```
 
-Ogni classe corrisponde a UNA singola proprietà CSS:
+Each utility class corresponds to a single CSS property:
 - `bg-slate-800` → `background-color: #1e293b`
 - `px-4` → `padding-left: 1rem; padding-right: 1rem`
 - `rounded-md` → `border-radius: 0.375rem`
 
-### 5.2 Vantaggi e Svantaggi nel progetto
+### 5.2 Advantages and Disadvantages in the Project
 
-**Vantaggi:**
-- **Rapido sviluppo**: non si scrive CSS, solo HTML
-- **Coerenza visiva**: palette di colori predefinita (slate, pink, red, etc.)
-- **Responsive**: classi come `md:w-80` cambiano stile al breakpoint
-- **Nessun file CSS**: Tailwind v4 "browser" compila al volo
+**Advantages:**
+- **Rapid Development**: Styles are authored directly in the HTML markup.
+- **Visual Consistency**: Consistent predefined color palettes (slate, pink, red, etc.).
+- **Responsive design**: Classes like `md:w-80` adapt styling at screen breakpoints.
+- **Zero build setup**: The Tailwind v4 browser script compiles classes on the fly.
 
-**Svantaggi:**
-- **HTML verboso**: le classi occupano spazio
-- **Curva di apprendimento**: nomi non intuitivi (`p-4` = padding 1rem)
-- **Lock-in**: difficile migrare ad altro framework senza riscrivere tutto
+**Disadvantages:**
+- **Verbose HTML**: Markup can become cluttered with styling utility classes.
+- **Learning Curve**: Utility names must be memorized (`p-4` = padding 1rem).
+- **Lock-in**: Hard to migrate to another CSS solution without completely rewriting classes.
 
-### 5.3 Versioni: CDN vs Build
+### 5.3 CDN vs Build Versions
 
-| Versione | Vantaggio | Svantaggio |
+| Version | Advantage | Disadvantage |
 |---|---|---|
-| **CDN** (`@tailwindcss/browser`) | Zero configurazione | CSS più grande |
-| **Build** (`npm install tailwindcss`) | CSS minimo (solo classi usate) | Richiede build step |
+| **CDN** (`@tailwindcss/browser`) | Zero configuration required | Larger download footprint |
+| **Build** (`npm install tailwindcss`) | Smallest CSS payload (purges unused classes) | Requires a build process |
 
-Il progetto usa la versione **CDN** perché non ha un build step.
+The project uses the **CDN** version to avoid introducing a compilation build step.
 
 ---
 
-## 6. Algoritmi e Strutture Dati
+## 6. Algorithms and Data Structures
 
-### 6.1 Mappa di Adiacenza (Adjacency Map)
+### 6.1 Adjacency Map
 
-**Problema:** Trovare i vicini di un nodo durante hover/click è un'operazione frequente. Scansionare tutti gli archi a ogni interazione è O(E) con E = 5000+.
+**Problem:** Finding the neighbors of a node on hover or selection is a frequent task. Scanning all edges at every mouse event is O(E) with E = 5000+.
 
-**Soluzione:** Pre-calcolare una struttura che risponde alla domanda "quali nodi sono vicini a questo?" in O(1).
+**Solution:** Pre-calculate a lookup structure that answers "which nodes are connected to this one?" in O(1) constant time.
 
 ```js
-// Costruzione (una volta, all'avvio)
+// Built once, at startup
 this.globalNodes.forEach(n => this.adjacency.set(n.id, new Set()));
 
 this.globalEdges.forEach(e => {
     const s = e.source, t = e.target;
     this.adjacency.get(s)?.add(t);  // s → t
-    this.adjacency.get(t)?.add(s);  // t → s (grafo non diretto)
+    this.adjacency.get(t)?.add(s);  // t → s (undirected graph)
 });
 ```
 
-**Rappresentazione:**
+**Representation:**
 ```
 adjacency Map {
     "SM_Entertainment" → Set { "NCT_127", "aespa", "Red_Velvet", ... }
@@ -610,16 +619,16 @@ adjacency Map {
 }
 ```
 
-**Complessità:**
-- Costruzione: O(N + E) — una passata su nodi e archi
-- Query: **O(1)** — `Map.get()` + `Set.size()` sono costanti
-- Memoria: O(N + E) — ogni arco viene memorizzato 2 volte (una per source, una per target)
+**Complexity:**
+- Construction: O(N + E) — a single pass over nodes and edges.
+- Query: **O(1)** — `Map.get()` + `Set.size()` are constant time operations.
+- Memory: O(N + E) — each edge is stored twice (once for source, once for target).
 
 ### 6.2 Viewport Culling
 
-**Problema:** Con 4700 nodi, anche a Canvas puro, disegnare tutti i nodi a ogni frame è lavoro sprecato se l'utente è zoomato su una zona specifica.
+**Problem:** Drawing all 4,700 nodes at every frame is wasted CPU/GPU effort if the user is zoomed into a specific region.
 
-**Soluzione:** Calcolare il rettangolo dello schermo in coordinate "mondo" e saltare i nodi fuori da esso.
+**Solution:** Calculate the boundary of the screen in "world" coordinates and skip rendering nodes that lie outside it.
 
 ```js
 const vp = {
@@ -629,77 +638,78 @@ const vp = {
     h: this.canvasH / this.transform.k + 120
 };
 
-// Durante il rendering:
+// During rendering:
 if (n.x < vp.x || n.x > vp.x + vp.w || 
     n.y < vp.y || n.y > vp.y + vp.h) continue;
 ```
 
-**Derivazione:**
+**Derivation:**
 
-Trasformazione schermo → mondo:
+Screen coordinate to world coordinate transformation:
 ```
-screenX = worldX * k + tx    ← inversa: worldX = (screenX - tx) / k
-screenY = worldY * k + ty    ← inversa: worldY = (screenY - ty) / k
+screenX = worldX * k + tx    ← inverse: worldX = (screenX - tx) / k
+screenY = worldY * k + ty    ← inverse: worldY = (screenY - ty) / k
 ```
 
-Il viewport in mondo è l'intervallo [0, canvasW] in screen trasformato in mondo, con un margine di 60px per evitare flickering ai bordi.
+The viewport boundary in world coordinates is calculated by mapping the screen bounds `[0, canvasW]` to world space, adding a 60px padding margin to prevent nodes from flashing on/off at the screen edges.
 
 ### 6.3 Debouncing
 
-**Problema:** Il listener `input` della ricerca si attiva a OGNI keystroke. Se l'utente digita "NCT" velocemente, la funzione `applySearchHighlight()` (che itera tutti i nodi) viene chiamata 3 volte in 200ms.
+**Problem:** The input search listener fires on EVERY single keystroke. If a user types "NCT" rapidly, `applySearchHighlight()` (which iterates over all nodes) is called 3 times in 200ms.
 
-**Soluzione:** Debounce — aspetta che l'utente smetta di digitare per 80ms prima di eseguire.
+**Solution:** Debounce — wait for the user to pause typing for 80ms before triggering the search query.
 
 ```js
 let searchTimeout;
 input.addEventListener("input", () => {
-    clearTimeout(searchTimeout);          ← Annulla il timer precedente
-    searchTimeout = setTimeout(           ← Imposta nuovo timer
-        handleSearch,                     ← Callback
-        80                                ← Attesa 80ms
+    clearTimeout(searchTimeout);          // ← Cancels the previous timer
+    searchTimeout = setTimeout(           // ← Starts a new timer
+        handleSearch,                     // ← Callback function
+        80                                // ← 80ms delay
     );
 });
 ```
 
-**Come funziona:**
+**How it works:**
 ```
-Digito "N" → timer parte (80ms)
-Digito "C" → timer annullato, riparte (80ms)
-Digito "T" → timer annullato, riparte (80ms)
-└── 80ms di pausa → handleSearch eseguito con query "NCT"
+Type "N" → timer starts (80ms)
+Type "C" → timer cancelled, restarts (80ms)
+Type "T" → timer cancelled, restarts (80ms)
+└── 80ms typing pause → handleSearch executes with query "NCT"
 ```
 
-Risultato: la ricerca viene eseguita UNA volta invece di 3.
+Result: the search logic runs ONCE instead of 3 times.
 
-### 6.4 Hit Detection (distanza al quadrato)
+### 6.4 Hit Detection (Squared Distance)
 
 ```js
 const dx = n.x - wx;
 const dy = n.y - wy;
-const dist = dx * dx + dy * dy;  // ← NON uso Math.sqrt()
+const dist = dx * dx + dy * dy;  // ← Square distance (DO NOT use Math.sqrt())
 ```
 
-**Perché distanza al quadrato?** `Math.sqrt()` è costosa (decine di cicli CPU). Confrontare il quadrato della distanza con il quadrato della soglia è matematicamente equivalente e molto più veloce:
+**Why squared distance?** Computing square roots (`Math.sqrt()`) is a computationally heavy CPU instruction. Comparing the squared distance against the squared threshold is mathematically equivalent and significantly faster:
 
 ```
 dist < threshold      ↔      dist² < threshold²
+Substituted:
 √(dx² + dy²) < 5      ↔      dx² + dy² < 25
 ```
 
-### 6.5 Barnes-Hut (gestito da D3)
+### 6.5 Barnes-Hut (handled by D3)
 
-D3.js usa internamente l'algoritmo **Barnes-Hut** per accelerare il calcolo delle forze molti-corpi (`d3.forceManyBody`).
+D3.js internally uses the **Barnes-Hut** algorithm to speed up the calculation of multi-body repulsion forces (`d3.forceManyBody`).
 
-**Principio:** Invece di calcolare la repulsione tra OGNI coppia di nodi (O(N²)), lo spazio viene suddiviso ricorsivamente in un **quadtree**:
+**Principle:** Instead of computing repulsion between EVERY node pair (O(N²)), space is recursively partitioned into a **quadtree**:
 
 ```
-Livello 1: ┌──────┬──────┐
-            │  A   │  B   │
-            ├──────┼──────┤
-            │  C   │  D   │
-            └──────┴──────┘
+Level 1: ┌──────┬──────┐
+         │  A   │  B   │
+         ├──────┼──────┤
+         │  C   │  D   │
+         └──────┴──────┘
 
-Livello 2 (solo quadrante A):
+Level 2 (quadrant A subdivided):
          ┌──┬──┐
          │A1│A2│
          ├──┼──┤
@@ -707,26 +717,26 @@ Livello 2 (solo quadrante A):
          └──┴──┘
 ```
 
-Per un nodo X, la repulsione con i nodi in un quadrante lontano viene calcolata **una volta sola** usando il centro di massa del quadrante, non singolarmente per ogni nodo. Questo riduce la complessità da O(N²) a **O(N log N)**.
+For any node X, the repulsion from nodes in a distant quadrant is computed **once** using that quadrant's collective center of mass, rather than calculating it individually for each node. This reduces the complexity from O(N²) to **O(N log N)**.
 
 ---
 
-## 7. Pattern Architetturali
+## 7. Architectural Patterns
 
 ### 7.1 Single Class Pattern
 
-Tutta la logica applicativa è incapsulata in una singola classe `KPopNetworkGraph`. Questo è un pattern chiamato **God Object** (o **Fat Controller**), criticato in architetture complesse ma **appropriato** per questo progetto perché:
+All application logic is encapsulated inside the `KPopNetworkGraph` class. This is sometimes called a **God Object** or **Fat Controller** pattern. While criticized in massive applications, it is **appropriate** for this project because:
 
-- L'applicazione ha un unico scopo
-- Non ci sono route, pagine multiple, o moduli indipendenti
-- La comunicazione tra metodi è interna (stato condiviso via `this`)
-- La ridotta complessità non giustifica la separazione in file multipli
+- The application has a single primary view and function.
+- There are no multiple routes, pages, or decoupled subsystems.
+- Method communication is self-contained (state shared via `this`).
+- The low structural complexity does not justify splitting the code across multiple files.
 
 ### 7.2 Event Delegation
 
-**Prima (SVG):** Ogni nodo `<g>` aveva i propri listener `mouseover`, `mouseout`, `click`. → **4700 x 3 = 14.100 listener** riassegnati a ogni cambio filtro.
+**Before (SVG):** Each node `<g>` element was assigned its own `mouseover`, `mouseout`, and `click` listeners. → **4700 nodes x 3 listeners = 14,100 event listeners** reallocated on every filter change.
 
-**Dopo (Canvas):** Un singolo listener per tipo di evento sul `<canvas>`. → **6 listener** totali.
+**After (Canvas):** A single event listener is registered for each event type on the `<canvas>` element. → **6 event listeners** in total.
 
 ```js
 this.canvas.addEventListener("mousedown", (e) => this.onMouseDown(e));
@@ -739,22 +749,23 @@ this.canvas.addEventListener("mouseleave",() => this.onMouseLeave());
 
 ### 7.3 Stateful Rendering
 
-La funzione `draw()` non è pura: dipende dallo **stato corrente** dell'applicazione (`selectedNode`, `hoveredNode`, `searchQuery`, `transform`, `connectedNodeIds`, `searchMatchedIds`).
+The `draw()` method is state-driven: its output depends on the **current state variables** of the application (`selectedNode`, `hoveredNode`, `searchQuery`, `transform`, `connectedNodeIds`, `searchMatchedIds`).
 
 ```
-draw() → legge lo stato corrente → disegna coerentemente
-               ↑
-        (qualsiasi metodo modifica lo stato e chiama draw())
+draw() → Reads current state variables → Renders graph elements accordingly
+                  ▲
+                  │
+        (Methods update state, then call draw())
 ```
 
-Questo pattern evita:
-- Manipolazioni frammentate del DOM (tipiche di jQuery)
-- Inconsistenze visive (lo stato è l'unica fonte di verità)
-- Doppio mantenimento (non devo aggiornare SVG + stato)
+This pattern avoids:
+- Fragmented DOM manipulation (a common source of bugs in libraries like jQuery).
+- Visual inconsistencies (the state variables act as the single source of truth).
+- Keeping multiple systems in sync (no SVG element attributes to keep updated in parallel).
 
 ### 7.4 Configuration Object Pattern
 
-I parametri configurabili sono raggruppati in un oggetto `CONFIG` globale:
+All configurable settings and constants are grouped in a single global `CONFIG` object:
 
 ```js
 const CONFIG = {
@@ -766,124 +777,124 @@ const CONFIG = {
 };
 ```
 
-Vantaggi:
-- **Tutte le costanti in un posto** — facile da trovare e modificare
-- **Nessun magic number** sparso nel codice
-- **Documentazione implicita** — i nomi delle proprietà descrivono lo scopo
+**Benefits:**
+- **Single source of truth** — settings are easy to find and modify.
+- **No magic numbers** scattered throughout the codebase.
+- **Implicit documentation** — property names describe what the parameters do.
 
 ---
 
-## 8. Ottimizzazioni Performance
+## 8. Performance Optimizations
 
-### 8.1 Riepilogo delle ottimizzazioni
+### 8.1 Summary of Optimizations
 
-| # | Ottimizzazione | Problema risolto | Miglioramento |
+| # | Optimization | Problem Solved | Improvement |
 |---|---|---|---|
-| 1 | Mappa di adiacenza | Loop O(E) su hover → O(1) | 100x |
-| 2 | Canvas 2D | DOM SVG lento con 10.000 elementi | 10.000x (DOM) |
-| 3 | Simulazione condizionale | Riavvio energia alta su ogni filtro | 5-10x |
-| 4 | Parametri fisici ridotti | Troppi tick per stabilizzarsi | 2x |
-| 5 | Debounce ricerca | ApplySearchHighlight a ogni keystroke | 10x percepito |
-| 6 | Viewport culling | Nodi fuori schermo renderizzati inutilmente | Variabile |
-| 7 | Hit detection custom | 4700 listener DOM → 1 listener canvas | 4700x |
-| 8 | requestAnimationFrame | Animazioni fluide per zoom/pan | 60fps stabili |
+| 1 | Adjacency Map | O(E) loop during hover → O(1) | 100x |
+| 2 | 2D Canvas | SVG DOM bottleneck with 10k+ nodes | 10,000x (DOM) |
+| 3 | Conditional Simulation Energy | Avoids high-energy restarts on filter changes | 5-10x |
+| 4 | Reduced Physics Settings | Fewer simulation steps to settle | 2x |
+| 5 | Search Debouncing | Avoids search execution on every keystroke | 10x perceived |
+| 6 | Viewport Culling | Avoids drawing nodes that are off-screen | Variable |
+| 7 | Custom Canvas Hit Detection | Avoids registering 4,700+ DOM click listeners | 4,700x |
+| 8 | requestAnimationFrame | Provides fluid view transitions for zoom/pan | Stable 60fps |
 
-### 8.2 Dettaglio tecnico delle ottimizzazioni
+### 8.2 Technical Breakdown of Optimizations
 
-**Ottimizzazione 1 — Mappa di adiacenza:**
-- **Prima**: `self.linkSelection.each(l => { if (l.source.id === d.id) ... })` — ogni hover iterava TUTTI gli archi visibili. Per 5000 archi, ~5000 iterazioni per hover.
-- **Dopo**: `self.adjacency.get(d.id)` — un `Map.get()` restituisce il `Set` dei vicini in tempo costante.
-- **Risultato**: 5000+ iterazioni → 1 lookup. L'hover non scala più con il numero di archi.
+**Optimization 1 — Adjacency Map:**
+- **Before**: `self.linkSelection.each(l => { if (l.source.id === d.id) ... })` — every hover scanned all visible edges. With 5,000 edges, this required ~5,000 iterations per hover event.
+- **After**: `self.adjacency.get(d.id)` — a single `Map.get()` returns the `Set` of neighbors in constant time.
+- **Result**: 5,000+ iterations reduced to a single lookup. Hover performance no longer scales with edge count.
 
-**Ottimizzazione 2 — Canvas 2D:**
-- **Prima**: D3 data join creava/rimuoveva/aggiornava elementi SVG. Ogni tick: 5000 `<line>` + 4700 `<g>` con attributi aggiornati.
-- **Dopo**: `clearRect()` + `arc()` + `lineTo()` su singolo `<canvas>`.
-- **Risultato**: Zero operazioni DOM durante il tick. La GPU gestisce il rendering.
+**Optimization 2 — 2D Canvas:**
+- **Before**: D3 data-join created/removed SVG nodes. Every tick modified positions of 5,000 `<line>` and 4,700 `<g>` elements in the DOM.
+- **After**: Drawing pixels using `clearRect()`, `arc()`, and `lineTo()` on a single `<canvas>` element.
+- **Result**: Zero DOM manipulations during simulation steps. Rendering is offloaded to the GPU.
 
-**Ottimizzazione 3 — Simulazione condizionale:**
-- **Prima**: Ogni `updateGraph()` chiamava `simulation.alpha(0.4).restart()`.
-- **Dopo**: Si confronta `filteredNodes.length` con `_prevNodeCount`. Se stiamo solo nascondendo nodi, alpha = 0.03 (appena sufficiente per riassestare).
-- **Risultato**: Nascondere nodi non causa più un "terremoto" nel grafo.
+**Optimization 3 — Conditional Energy Restart:**
+- **Before**: Every filter change called `simulation.alpha(0.4).restart()`, creating massive movement.
+- **After**: Node counts before and after filtering are compared. If nodes were only removed, the simulation restarts with `alpha = 0.03` (just enough to adjust positions gently).
+- **Result**: Hiding nodes no longer creates a massive shaking effect.
 
-### 8.3 Bottleneck residuo
+### 8.3 Remaining Bottleneck
 
-L'unico bottleneck che rimane è la **simulazione D3-force stessa** con 4700 nodi. Ogni tick esegue:
-- Barnes-Hut force: O(N log N) con N=4700
-- Link force: O(E) con E=5000
-- Collision force: O(N) con N=4700
+The only remaining performance bottleneck is the **CPU cost of the D3-force simulation itself** for 4,700 nodes. Every tick must compute:
+- Barnes-Hut multi-body forces: O(N log N) with N=4700.
+- Link spring forces: O(E) with E=5000.
+- Collision resolution: O(N) with N=4700.
 
-Anche con Canvas, se la CPU non riesce a calcolare 60 tick al secondo, il frame rate sarà limitato dalla simulazione, non dal rendering. Questo è accettabile perché la simulazione si ferma dopo ~100-200 tick (una volta raggiunto alpha < alphaMin).
+Even with Canvas rendering, if the CPU cannot compute 60 simulation ticks per second, the framerate will be bottlenecked by the physics, not the graphics. This is acceptable because the simulation cools down and stops after ~100-200 ticks once `alpha < alphaMin`.
 
 ---
 
-## 9. Glossario Tecnico
+## 9. Technical Glossary
 
-| Termine | Significato |
+| Term | Meaning |
 |---|---|
-| **Alpha** | Energia residua della simulazione. 1 = massima energia, 0 = ferma |
-| **Alpha decay** | Tasso di decadimento dell'energia a ogni tick |
-| **Alpha min** | Soglia minima: quando alpha < alphaMin, la simulazione si ferma |
-| **Barnes-Hut** | Algoritmo per accelerare il calcolo delle forze N-corpi usando un quadtree |
-| **CDN** | Content Delivery Network — rete di server per distribuire librerie |
-| **Culling** | Tecnica per non processare elementi non visibili |
-| **Debounce** | Tecnica per ritardare l'esecuzione di una funzione fino a quando non c'è una pausa |
-| **DPI / DPR** | Device Pixel Ratio — rapporto tra pixel fisici e pixel logici dello schermo |
-| **Force-directed** | Algoritmo di layout che usa simulazione fisica per posizionare nodi |
-| **GlobalAlpha** | Proprietà Canvas che controlla l'opacità di tutto ciò che viene disegnato |
-| **God Object** | Pattern dove un singolo oggetto gestisce troppe responsabilità |
-| **HiDPI** | Schermi ad alta densità di pixel (Retina, 4K, etc.) |
-| **Hit detection** | Tecnica per determinare su quale oggetto grafico l'utente ha cliccato |
-| **Layout** | Posizionamento dei nodi nello spazio bidimensionale |
-| **Lookup O(1)** | Operazione che richiede tempo costante, indipendente dalla dimensione dei dati |
-| **Quadtree** | Struttura dati ad albero che suddivide ricorsivamente lo spazio in 4 quadranti |
-| **Repaint** | Fase del rendering browser che ridisegna i pixel a schermo |
-| **Reflow** | Fase del rendering browser che ricalcola posizioni e dimensioni degli elementi DOM |
-| **requestAnimationFrame** | API browser per animazioni sincronizzate con il refresh rate dello schermo |
-| **Tick** | Singolo step della simulazione (tipicamente 1/60s) |
-| **Utility-first** | Approccio CSS dove si usano classi atomiche anziché componenti astratti |
-| **Viewport** | Porzione visibile della finestra del browser |
-| **Viewport culling** | Non disegnare oggetti fuori dal viewport |
+| **Alpha** | The current energy level of the physics simulation. 1 is maximum, 0 is stopped |
+| **Alpha decay** | The rate at which the simulation energy decreases at each tick |
+| **Alpha min** | The threshold below which the simulation stops executing |
+| **Barnes-Hut** | An algorithm that speeds up multi-body force calculations to O(N log N) using a quadtree |
+| **CDN** | Content Delivery Network — a network of servers used to distribute assets and libraries |
+| **Culling** | The technique of ignoring elements that are not currently visible to save computing power |
+| **Debounce** | A method of delaying a function's execution until a certain duration of inactivity has passed |
+| **DPI / DPR** | Device Pixel Ratio — the ratio of physical screen pixels to logical CSS pixels |
+| **Force-directed** | A layout algorithm that uses physical forces (springs/repulsion) to arrange graphs |
+| **GlobalAlpha** | A Canvas property that controls the opacity of all subsequent drawing commands |
+| **God Object** | An architectural anti-pattern where a single object holds too many responsibilities |
+| **HiDPI** | High density display screens (e.g. Apple Retina, 4K monitors) |
+| **Hit detection** | Determining which graphical object the user has hovered over or clicked |
+| **Layout** | The spatial arrangement of nodes in 2D or 3D space |
+| **Lookup O(1)** | An operation that completes in constant time, independent of dataset size |
+| **Quadtree** | A tree structure that recursively divides a 2D space into 4 quadrants |
+| **Repaint** | The browser rendering step that redraws pixels on the screen |
+| **Reflow** | The browser rendering step that recalculates the geometry and layout of DOM elements |
+| **requestAnimationFrame**| A browser API for scheduling animations synchronized with the screen's refresh rate |
+| **Tick** | A single step of the physics simulation (typically 1/60th of a second) |
+| **Utility-first** | A CSS design approach utilizing composition of atomic classes instead of abstract components |
+| **Viewport** | The visible portion of a web page in the browser window |
+| **Viewport culling** | Skipping the drawing commands for elements that are outside the visible screen region |
 
 ---
 
-## 10. Possibili Domande d'Esame
+## 10. Possible Exam Questions
 
-### Q1: Perché avete scelto Canvas invece di SVG?
+### Q1: Why did you choose Canvas over SVG?
 
-> L'applicazione gestisce ~4700 nodi e ~5000 archi. Con SVG, ogni entità è un elemento DOM: ~10.000 elementi totali. Ogni tick della simulazione modifica la posizione di tutti questi elementi, causando reflow e repaint costosi. Canvas è un singolo elemento DOM che disegna su una bitmap interna: non c'è DOM da aggiornare. Il rendering è accelerato via GPU e non scala con il numero di elementi.
+> The application handles ~4,700 nodes and ~5,000 edges. With SVG, every node and edge is a DOM element (totaling ~10,000 elements). Every tick of the physics simulation updates positions, causing expensive DOM reflow and repaint calculations. Canvas is a single DOM node that draws onto a flat bitmap. GPU-accelerated rasterization scales exceptionally well and avoids DOM modification overhead.
 
-### Q2: Come gestite la hit detection su Canvas?
+### Q2: How do you handle hit detection on the Canvas?
 
-> Canvas non ha eventi per elemento. Convertiamo le coordinate del mouse in coordinate "mondo" tramite la trasformazione inversa (zoom/pan), poi iteriamo i nodi attivi cercando il più vicino entro un raggio pari al raggio del cerchio + 3px. Usiamo la distanza al quadrato per evitare la costosa `Math.sqrt()`. L'operazione O(N) con N=4700 richiede ~0.5ms, trascurabile per 60fps.
+> Since Canvas doesn't fire click events for individual drawings, we listen for clicks on the canvas element, translate the mouse screen coordinate to world space using the inverse transform matrix (zoom/pan offset), and iterate through active nodes to find the closest one. We compare squared distances to skip calling the slow `Math.sqrt()` function. This O(N) iteration for N=4,700 nodes takes ~0.5ms, which is trivial.
 
-### Q3: Come funziona la simulazione force-directed di D3.js?
+### Q3: How does the D3.js force-directed simulation work?
 
-> D3 assegna forze fisiche a ogni nodo: repulsione tra tutte le coppie (via algoritmo Barnes-Hut O(N log N)), attrazione elastica lungo gli archi, forza centripeta verso il centro, e collisione per evitare sovrapposizioni. Ogni tick (ogni ~16ms) vengono aggiornate posizioni e velocità. L'energia (alpha) decade a ogni tick fino a fermarsi quando alpha < alphaMin.
+> D3 assigns physical forces to nodes: repulsion between all node pairs (using the Barnes-Hut O(N log N) algorithm), elastic spring attraction along edges, centripetal center forces, and collision forces to prevent overlaps. The velocity and position of nodes are updated on each tick. The simulation cools down over time as the energy level (`alpha`) decays, stopping once it falls below the minimum threshold.
 
-### Q4: Come avete ottimizzato la gestione degli archi per hover e selezione?
+### Q4: How did you optimize edge checking for hovers and selection?
 
-> Abbiamo pre-calcolato una mappa di adiacenza: `Map<nodeId, Set<neighborIds>>`. Costruita una volta all'avvio. Invece di scansionare 5000+ archi a ogni hover, facciamo un `Map.get()` O(1) che restituisce tutti i vicini del nodo.
+> We pre-calculated an adjacency map: `Map<nodeId, Set<neighborIds>>` at startup. Instead of searching through all 5,000+ edges on every hover event to find connected nodes, we perform an O(1) map lookup `Map.get(nodeId)` which instantly returns the set of neighboring IDs.
 
-### Q5: Perché non avete usato React o un altro framework?
+### Q5: Why did you choose not to use React or other frameworks?
 
-> Il progetto è una single-page application con un unico scopo: visualizzare un grafo. React avrebbe introdotto overhead (Virtual DOM, bundle size) senza benefici reali, dato che il contenuto primario è su Canvas (non DOM) e l'unica UI DOM sono sidebar/header. Vanilla JS mantiene il progetto leggero e diretto.
+> The application is a single-page app focused purely on displaying a graph. React would have introduced extra bundle size and virtual DOM overhead with no benefit, since the primary view is drawn inside a Canvas and the remaining UI consists of a simple sidebar and header. Vanilla JavaScript keeps the project fast, clean, and directly runnable.
 
-### Q6: Come gestite la differenza tra click e drag?
+### Q6: How do you distinguish between clicking and dragging?
 
-> Salviamo la posizione del mouse al `mousedown`. Al `click`, se il mouse si è mosso più di 5px, consideriamo l'evento un drag e ignoriamo il click. Questo evita che dopo un pan si deselezioni il nodo.
+> We record the mouse coordinates on `mousedown`. On mouse release (`click`/`mouseup`), if the cursor has moved more than 5 pixels, we classify the action as a drag/pan operation and skip triggering the node selection event. This prevents node deselection when panning the view.
 
-### Q7: Spiegate il sistema di zoom e pan.
+### Q7: Explain your zoom and pan implementation.
 
-> Non usiamo D3 zoom. Manteniamo manualmente una trasformazione `{x, y, k}` (traslazione e scala). Per lo zoom with wheel, calcoliamo il nuovo k e applichiamo lo zoom verso il punto sotto il mouse. Per il pan, aggiorniamo x/y durante il drag. In `draw()`, applichiamo `ctx.translate(tx, ty)` e `ctx.scale(k, k)` prima di disegnare.
+> We don't use D3 zoom. We manage the transformation state `{x, y, k}` (offsets and scale) manually. During scroll wheel events, we compute the new scale `k` and translate offsets to zoom centered on the cursor position. During dragging on the background, we update the `x` and `y` offsets. Before rendering in `draw()`, we apply `ctx.translate(tx, ty)` and `ctx.scale(k, k)`.
 
-### Q8: Come garantite che la grafica sia nitida su schermi Retina?
+### Q8: How do you ensure visual sharpness on Retina screens?
 
-> Usiamo `window.devicePixelRatio` per moltiplicare la dimensione fisica del canvas. Il canvas ha dimensioni logiche (CSS) e dimensioni fisiche (pixel reali). Senza questo scaling, su Retina ogni pixel CSS corrisponde a 2-3 pixel fisici e l'immagine appare sgranata.
+> We scale the physical canvas size by the browser's `window.devicePixelRatio` while keeping its CSS display size constant. We then call `ctx.setTransform(dpr, 0, 0, dpr, 0, 0)` in our draw loop. Without this scaling, one CSS pixel would be mapped to a single physical pixel, resulting in blurry rendering on high-DPI displays.
 
-### Q9: Come avete ridotto i lag nei filtri?
+### Q9: How did you reduce lag when applying filters?
 
-> Quando l'utente nasconde nodi (deseleziona un filtro), la simulazione non riparte con energia piena. Confrontiamo il conteggio dei nodi prima/dopo il filtro: se stiamo solo rimuovendo nodi, alpha = 0.03 (energia minima). Se stiamo aggiungendo, alpha = 0.15.
+> When nodes are hidden by filter toggles, we avoid restarting the simulation at full energy. We compare active node counts before and after the change: if nodes were only removed, we restart with a minimal energy level `alpha = 0.03`. If nodes were added, we use `alpha = 0.15`. This prevents a high-energy "explosion" effect when hiding elements.
 
-### Q10: Come funziona la navigazione nel pannello dettagli?
+### Q10: How does the details panel navigation work?
 
-> Quando l'utente clicca un nodo, `showNodeDetails()` popola il pannello laterale con nome, tipo e connessioni. Le connessioni sono ottenute iterando gli archi attivi della simulazione. Cliccando una connessione, si chiama `selectNode(neighbor)` che centra il grafo sul nuovo nodo e aggiorna i dettagli.
+> Clicking a node triggers `showNodeDetails()`, which populates the sidebar with the node's attributes and connections. Connections are gathered by scanning the active edges. Clicking a connection link in the list calls `selectNode(neighborId)`, which centers the view on the neighbor node and updates the details panel seamlessly.

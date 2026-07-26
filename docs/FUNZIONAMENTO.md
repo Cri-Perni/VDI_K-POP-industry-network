@@ -1,349 +1,349 @@
-# K-Pop Network Analysis — Guida al Funzionamento
+# K-Pop Network Analysis — How it Works Guide
 
-## 1. Panoramica Generale
+## 1. General Overview
 
-Applicazione web per visualizzare le relazioni nell'industria **K-Pop** sotto forma di **grafo interattivo**. Ogni nodo è un'entità (agenzia, gruppo musicale, idol), ogni arco è una relazione (management, membership, collaborazione).
+A web application to visualize relationships in the **K-Pop** industry in the form of an **interactive graph**. Each node represents an entity (agency/label, music group, idol), and each edge represents a relationship (management, membership, collaboration).
 
-**Tecnologie utilizzate:**
-- **D3.js v7** — simulazione fisica force-directed
-- **Canvas 2D API** — rendering delle entità grafiche
-- **Tailwind CSS v4** — interfaccia utente
-- **JavaScript ES6** — logica applicativa
+**Technologies Used:**
+- **D3.js v7** — force-directed physics simulation
+- **Canvas 2D API** — rendering of graphical entities
+- **Tailwind CSS v4** — user interface
+- **JavaScript ES6** — application logic
 
 ---
 
-## 2. Architettura del Sistema
+## 2. System Architecture
 
-### Diagramma di flusso
+### Flowchart
 
 ```
                     ┌──────────────────────┐
-                    │   CSV (nodi + archi) │
+                    │   CSV (nodes + edges)│
                     └──────────┬───────────┘
                                │
                     ┌──────────▼───────────┐
                     │  initialize()        │
-                    │  Carica e parsifica  │
-                    │  i dati              │
+                    │  Load and parse      │
+                    │  data                │
                     └──────┬──────────┬────┘
                            │          │
-              ┌────────────▼──┐  ┌───▼────────────┐
-              │ initCanvas()  │  │ setupListeners() │
-              │ Crea canvas   │  │ Aggancia        │
-              │ e simulazione │  │ eventi UI       │
-              └───────┬───────┘  └────────────────┘
-                      │
-              ┌───────▼────────┐
-              │  updateGraph() │ ←── Cambi filtri / resize
-              │  Filtra dati   │
-              │  Avvia fisica  │
-              └───────┬────────┘
-                      │
-              ┌───────▼────────┐
-              │  simulation    │
-              │  .on("tick")   │──→ draw() [Canvas]
-              │  Calcola       │
-              │  posizioni     │
-              └────────────────┘
+               ┌────────────▼──┐  ┌───▼────────────┐
+               │ initCanvas()  │  │ setupListeners() │
+               │ Create canvas │  │ Bind           │
+               │ & simulation  │  │ UI events      │
+               └───────┬───────┘  └────────────────┘
+                       │
+               ┌───────▼────────┐
+               │  updateGraph() │ ←── Filter changes / window resize
+               │  Filter data   │
+               │  Start physics │
+               └───────┬────────┘
+                       │
+               ┌───────▼────────┐
+               │  simulation    │
+               │  .on("tick")   │──→ draw() [Canvas]
+               │  Calculate     │
+               │  positions     │
+               └────────────────┘
 ```
 
-### Classi e metodi principali
+### Key Classes and Methods
 
 ```
 KPopNetworkGraph
-├── initialize()        — Entry point: carica dati, inizializza canvas e UI
-├── initCanvas()        — Crea elemento <canvas> e motore D3-force
-├── updateGraph()       — Filtra nodi/archi, aggiorna simulazione
-├── draw()              — Renderizza il grafo su canvas (60fps)
+├── initialize()        — Entry point: loads data, initializes canvas and UI
+├── initCanvas()        — Creates <canvas> element and D3-force engine
+├── updateGraph()       — Filters nodes/edges, updates simulation
+├── draw()              — Renders the graph on canvas (60fps)
 │
 ├── Mouse handlers
-│   ├── onMouseDown()   — Inizio drag (nodo o pan)
+│   ├── onMouseDown()   — Start drag (node or pan)
 │   ├── onMouseMove()   — Drag/hover
-│   ├── onMouseUp()     — Fine drag
-│   ├── onClick()       — Selezione nodo / deselezione
+│   ├── onMouseUp()     — End drag
+│   ├── onClick()       — Node selection / deselection
 │   ├── onWheel()       — Zoom
-│   └── onMouseLeave()  — Pulisce hover
+│   └── onMouseLeave()  — Clears hover
 │
-├── selectNode()        — Seleziona nodo, mostra dettagli, centra
-├── clearNodeSelection() — Deseleziona
-├── showNodeDetails()   — Popola sidebar con info e connessioni
+├── selectNode()        — Selects node, shows details, centers view
+├── clearNodeSelection() — Deselects selection
+├── showNodeDetails()   — Populates sidebar with info and connections
 │
-├── setupSearch()       — Ricerca con debounce (80ms)
-├── applySearchHighlight() — Evidenzia risultati ricerca
+├── setupSearch()       — Debounced search (80ms)
+├── applySearchHighlight() — Highlights search results
 │
-├── resetZoom()         — Torna alla vista iniziale
-├── panToNode()         — Anima il centramento su un nodo
+├── resetZoom()         — Returns to initial view
+├── panToNode()         — Animates centering on a node
 │
 └── Helpers
-    ├── findNodeAt()    — Hit detection (screen → nodo)
-    ├── screenToWorld() — Coordinata schermo → mondo
-    ├── getActiveNodes()— Nodi attualmente nella simulazione
-    └── getActiveEdges()— Archi attualmente nella simulazione
+    ├── findNodeAt()    — Hit detection (screen → node)
+    ├── screenToWorld() — Coordinate conversion: screen → world
+    ├── getActiveNodes()— Nodes currently in the simulation
+    └── getActiveEdges()— Edges currently in the simulation
 ```
 
 ---
 
-## 3. Dati in Ingresso
+## 3. Input Data
 
-### Formato CSV
+### CSV Format
 
-**K-pop_node.csv** (4674 nodi)
-| Campo | Esempio | Descrizione |
+**K-pop_node.csv** (4674 nodes)
+| Field | Example | Description |
 |---|---|---|
-| `id` | `SM_Entertainment` | Identificativo univoco |
-| `name` | `SM Entertainment` | Nome visualizzato |
-| `type` | `label` | Tipo: `label`, `group`, `person`, `male`, `female` |
+| `id` | `SM_Entertainment` | Unique identifier |
+| `name` | `SM Entertainment` | Display name |
+| `type` | `label` | Type: `label`, `group`, `person`, `male`, `female` |
 
-**K-pop_edge.csv** (5094 archi)
-| Campo | Esempio | Descrizione |
+**K-pop_edge.csv** (5094 edges)
+| Field | Example | Description |
 |---|---|---|
-| `source` | `SM_Entertainment` | ID nodo sorgente |
-| `target` | `NCT_127` | ID nodo destinazione |
+| `source` | `SM_Entertainment` | Source node ID |
+| `target` | `NCT_127` | Target node ID |
 
-### Inferenza del tipo di relazione
+### Relational Inference
 
-Il tipo di relazione non è esplicito nei dati, ma viene inferito automaticamente dal codice (`app.js:113-129`):
+The type of relationship is not explicit in the CSV data but is inferred automatically in the code:
 
 ```
-Se source.type === "label"       → relazione = "management"
-Se source.type è persona e
-   target.type === "group"       → relazione = "membership"
-Altrimenti                       → relazione = "association"
+If source.type === "label"       → relationship = "management"
+If source.type is person and
+   target.type === "group"       → relationship = "membership"
+Otherwise                       → relationship = "association"
 ```
 
-### Colori associati
+### Color Mapping
 
-| Tipo nodo | Colore | Ruolo |
+| Node Type | Color | Role |
 |---|---|---|
-| `label` | 🔴 Rosso | Agenzia di management |
-| `group` | 🔵 Blu | Gruppo musicale |
-| `person` | 🟢 Verde | Idol generico |
-| `male` | 🔷 Cyan | Idol maschile |
-| `female` | 🩷 Rosa | Idol femminile |
+| `label` | 🔴 Red | Management agency / Label |
+| `group` | 🔵 Blue | Music group |
+| `person` | 🟢 Green | Generic Idol |
+| `male` | 🔷 Cyan | Male Idol |
+| `female` | 🩷 Pink | Female Idol |
 
-| Tipo relazione | Colore | Significato |
+| Edge Type | Color | Meaning |
 |---|---|---|
-| `management` | 🔴 Rosso | Contratto agenzia → artista/gruppo |
-| `membership` | 🔵 Blu | Appartenenza idol → gruppo |
-| `association` | 🟢 Verde | Collaborazione o altra relazione |
+| `management` | 🔴 Red | Agency → artist/group contract |
+| `membership` | 🔵 Blue | Idol → group membership |
+| `association` | 🟢 Green | Collaboration or other relation |
 
 ---
 
-## 4. Motore Fisico (D3 Force Simulation)
+## 4. Physics Engine (D3 Force Simulation)
 
-### Come funziona
+### How it Works
 
-La simulazione force-directed assegna forze fisiche a ogni nodo:
+The force-directed simulation assigns physical forces to each node:
 
 ```
-Nodo caricato ──→ Forza di repulsione (charge)    ← allontana nodi tra loro
-              │
-              ├──→ Forza elastica (link)           ← tiene uniti i nodi collegati
-              │
-              ├──→ Forza centripeta (center)       ← mantiene tutto al centro
-              │
-              └──→ Forza di collisione (collide)   ← evita sovrapposizioni
+Loaded node ──→ Repulsion force (charge)    ← pushes nodes apart from each other
+             │
+             ├──→ Elastic force (link)        ← holds connected nodes together
+             │
+             ├──→ Centripetal force (center)  ← keeps everything centered
+             │
+             └──→ Collision force (collide)   ← prevents node overlaps
 ```
 
-Il sistema evolve nel tempo (tick dopo tick) fino a raggiungere un equilibrio stabile.
+The system evolves over time (tick by tick) until it reaches a stable equilibrium.
 
-### Parametri configurati
+### Configuration Parameters
 
-| Parametro | Valore | Effetto |
+| Parameter | Value | Effect |
 |---|---|---|
-| `chargeStrength` | -80 | Repulsione tra nodi (più alto = più spaziati) |
-| `linkDistance` | 75 | Lunghezza ideale degli archi |
-| `collisionRadius` | 18 | Raggio minimo tra nodi |
-| `alphaUpdateRestart` | 0.15 | Energia iniziale quando si aggiungono nodi |
-| `alphaTargetDrag` | 0.15 | Reattività durante il trascinamento |
+| `chargeStrength` | -80 | Repulsion between nodes (higher = more spaced out) |
+| `linkDistance` | 75 | Ideal length of edges |
+| `collisionRadius` | 18 | Minimum radius between nodes |
+| `alphaUpdateRestart` | 0.15 | Initial energy when nodes are added |
+| `alphaTargetDrag` | 0.15 | Responsiveness during drag operations |
 
-### Ciclo di vita della simulazione
+### Simulation Lifecycle
 
 ```
-updateGraph() chiamata
+updateGraph() called
        │
        ▼
 simulation.nodes(filteredNodes)
 simulation.force("link").links(filteredEdges)
        │
        ▼
-Se si AGGIUNGONO nodi → alpha = 0.15 (energia media)
-Se si RIMUOVONO nodi → alpha = 0.03 (energia minima)
+If nodes are ADDED → alpha = 0.15 (medium energy)
+If nodes are REMOVED → alpha = 0.03 (minimal energy)
        │
        ▼
-Ogni tick: D3 calcola le nuove posizioni
+Every tick: D3 calculates new positions
        │
        ▼
-draw() → Canvas aggiorna la grafica
+draw() → Canvas updates graphics
        │
        ▼
-alpha decade a 0 → simulazione si ferma
+alpha decays to 0 → simulation stops
 ```
 
 ---
 
-## 5. Rendering (Canvas 2D)
+## 5. Rendering (2D Canvas)
 
-### Perché Canvas invece di SVG?
+### Why Canvas instead of SVG?
 
-| Caratteristica | SVG | Canvas |
+| Feature | SVG | Canvas |
 |---|---|---|
-| N. elementi DOM | 1 per nodo + 1 per arco | 1 totale |
-| Performance con 5000 elementi | 🟠 Lento (reflow DOM) | 🟢 Veloce (GPU) |
-| Hit detection | Automatizzata (eventi DOM) | Manuale (calcolo coordinate) |
-| Zoom/Pan | D3 zoom trasforma `<g>` | `ctx.translate()` / `ctx.scale()` |
-| Qualità testo | 🟢 Nitido | 🟠 Leggermente meno nitido |
+| DOM Elements | 1 per node + 1 per edge | 1 total |
+| Performance with 5,000+ elements | 🟠 Slow (DOM reflow) | 🟢 Fast (GPU-accelerated) |
+| Hit Detection | Automatic (DOM events) | Manual (coordinate math) |
+| Zoom/Pan | D3 zoom transforms `<g>` | `ctx.translate()` / `ctx.scale()` |
+| Text Quality | 🟢 Sharp | 🟠 Slightly less sharp |
 
-### Struttura del metodo draw()
+### Structure of the draw() Method
 
 ```
 draw()
 │
-├── 1. Reset trasformazione (HiDPI scaling)
-├── 2. Sfondo scuro (#0f172a)
-├── 3. Applica zoom/pan (ctx.translate + ctx.scale)
+├── 1. Reset transform (HiDPI scaling)
+├── 2. Clear with dark background (#0f172a)
+├── 3. Apply zoom/pan (ctx.translate + ctx.scale)
 │
-├── 4. Determina stato evidenziazione
+├── 4. Determine highlight states
 │   ├── searchQuery  → highlight matchedIds
-│   ├── selectedNode → highlight nodo + vicini
-│   └── hoveredNode  → highlight nodo + vicini
+│   ├── selectedNode → highlight node + neighbors
+│   └── hoveredNode  → highlight node + neighbors
 │
-├── 5. Disegna ARCHI (link)
-│   ├── Itera activeEdges
-│   ├── globalAlpha in base a evidenziazione
-│   └── strokeStyle in base al tipo (management/membership/association)
+├── 5. Draw EDGES (links)
+│   ├── Iterate through activeEdges
+│   ├── globalAlpha based on highlight state
+│   └── strokeStyle based on type (management/membership/association)
 │
-├── 6. Disegna NODI (cerchi)
-│   ├── Itera activeNodes con viewport culling
-│   ├── fillStyle in base al tipo nodo
-│   ├── Anello bianco extra per hovered/selected
-│   └── globalAlpha in base a evidenziazione
+├── 6. Draw NODES (circles)
+│   ├── Iterate activeNodes with viewport culling
+│   ├── fillStyle based on node type
+│   ├── Extra white ring for hovered/selected nodes
+│   └── globalAlpha based on highlight state
 │
-└── 7. Disegna ETICHETTE (solo se zoom > 0.4x)
-    ├── Itera activeNodes con viewport culling
-    └── fillText() con nome nodo
+└── 7. Draw LABELS (only if zoom > 0.4x)
+    ├── Iterate activeNodes with viewport culling
+    └── fillText() with node name
 ```
 
-### Viewport culling
+### Viewport Culling
 
 ```
-    ┌─── Schermo ────┐
+    ┌─── Screen ─────┐
     │  Canvas        │
     │  ┌─────────┐   │
-    │  │ Viewport │   │  ← Solo nodi in quest'area
-    │  │ (visibile)│  │    vengono disegnati
+    │  │ Viewport │   │  ← Only nodes in this area
+    │  │ (visible)│   │    are drawn
     │  └─────────┘   │
     │                │
     └────────────────┘
-    ╔══ Nodo fuori viewport ═══╗  ← SKIP (non disegnato)
+    ╔══ Node outside viewport ══╗  ← SKIPPED (not drawn)
     ╚═══════════════════════════╝
 ```
 
 ---
 
-## 6. Interazione Utente
+## 6. User Interaction
 
 ### Hover
 
 ```
-Mouse si muove sul canvas
+Mouse moves over canvas
       │
       ▼
-screenToWorld(e) → coordinate mondo (wx, wy)
+screenToWorld(e) → world coordinates (wx, wy)
       │
       ▼
-findNodeAt(wx, wy) → cerca nodo più vicino
+findNodeAt(wx, wy) → searches for closest node
       │
       ▼
-Se nodo trovato e diverso da hoveredNode:
+If node found and different from hoveredNode:
       │
       ▼
-hoveredNode = nodo
-draw() → evidenzia nodo + vicini (opacità)
+hoveredNode = node
+draw() → highlights node + neighbors (adjusts opacity)
 ```
 
-### Click su nodo
+### Clicking on a Node
 
 ```
-Click sul canvas
+Click on canvas
       │
       ▼
-findNodeAt() → nodo sotto il mouse?
+findNodeAt() → node under mouse pointer?
       │
-      ├── Sì → selectNode(nodo)
-      │         ├── showNodeDetails() → sidebar con nome, tipo, connessioni
-      │         ├── highlight nodo + vicini
-      │         └── panToNode() → anima il centramento
+      ├── Yes → selectNode(node)
+      │          ├── showNodeDetails() → sidebar with name, type, connections
+      │          ├── highlight node + neighbors
+      │          └── panToNode() → animate viewport centering
       │
-      └── No → deseleziona (se c'era una selezione)
+      └── No → deselect (if a node was selected)
 ```
 
-### Drag
+### Dragging
 
 ```
-MouseDown su nodo   → imposta fx/fy del nodo (lo blocca)
-MouseDown su sfondo → inizia pan della visuale
+MouseDown on node       → set node fx/fy (locks position)
+MouseDown on background → begin panning the viewport
       │
       ▼
-MouseMove → aggiorna posizione nodo o trasformazione
+MouseMove → update node position or viewport transform
       │
       ▼
-MouseUp → rilascia fx/fy (nodo torna libero)
+MouseUp → release fx/fy (node is free again)
 ```
 
-### Zoom (rotellina)
+### Zooming (Scroll Wheel)
 
 ```
 Wheel event
       │
       ▼
-Calcola nuovo fattore di scala (0.92x o 1.08x)
+Calculate new scale factor (0.92x or 1.08x)
       │
       ▼
-Applica zoom verso il punto sotto il mouse:
+Apply zoom focused on mouse coordinate:
   transform.x = mx - delta * (mx - transform.x)
   transform.y = my - delta * (my - transform.y)
   transform.k *= delta
       │
       ▼
-draw() → render con nuova trasformazione
+draw() → render with new transformation matrix
 ```
 
-### Ricerca
+### Searching
 
 ```
-Input utente
+User inputs text
       │
       ▼
-Attesa 80ms (debounce)
+Wait 80ms (debounce)
       │
       ▼
 handleSearch()
       │
       ▼
-Se query vuota → ripristina vista normale
-Se query presente → applySearchHighlight()
+If query empty → restore normal view
+If query present → applySearchHighlight()
       │
       ▼
-Itera nodi attivi, matcha nome/id case-insensitive
+Iterate active nodes, case-insensitive match on name/id
       │
       ▼
-draw() evidenzia nodi matchati
+draw() highlights matching nodes
 ```
 
 ---
 
-## 7. Filtri
+## 7. Filters
 
-I checkbox filtro controllano quali **tipi di nodo** sono visibili:
+Checkboxes control which **node types** are visible:
 
 ```
-filterLabel  ☑ → mostra label (agenzie)
-filterGroup  ☑ → mostra group (gruppi)
-filterPerson ☑ → mostra person/male/female (idols)
+filterLabel  ☑ → show labels (agencies)
+filterGroup  ☑ → show groups (music groups)
+filterPerson ☑ → show person/male/female (idols)
 ```
 
-Quando un filtro cambia:
+When a filter state changes:
 
 ```
 Change event
@@ -352,49 +352,49 @@ Change event
 updateGraph()
       │
       ▼
-1. Filtra globalNodes per tipo
-2. Crea Set activeNodeIds
-3. Filtra globalEdges (solo archi tra nodi visibili)
-4. Se selectedNode non è più visibile → clearNodeSelection()
+1. Filter globalNodes by type
+2. Create Set of activeNodeIds
+3. Filter globalEdges (only connections between visible nodes)
+4. If selectedNode is no longer visible → clearNodeSelection()
 5. simulation.nodes(filteredNodes)
 6. simulation.force("link").links(filteredEdges)
-7. Restart condizionale (alpha 0.15 se aggiungo, 0.03 se rimuovo)
+7. Conditional restart (alpha 0.15 if adding, 0.03 if removing nodes)
 ```
 
 ---
 
-## 8. Pannello Dettagli
+## 8. Details Panel
 
-Quando si clicca un nodo:
+When a node is clicked:
 
 ```
-┌─ Dettagli Entità ──────────────────┐
+┌─ Entity Details ────────────────────┐
 │  [X]                                │
 │                                     │
-│  Nome:   NCT 127                    │
-│  Tipo:   [Gruppo]                   │
+│  Name:   NCT 127                    │
+│  Type:   [Group]                    │
 │                                     │
-│  Relazioni attive: 12               │
+│  Active Relations: 12               │
 │                                     │
-│  Connessioni:                       │
+│  Connections:                       │
 │  ┌─────────────────────────────┐    │
-│  │ SM Entertainment  Management│ ← cliccabile
-│  │ Taeyong             Membro  │ ← cliccabile
-│  │ MARK                Membro  │ ← cliccabile
+│  │ SM Entertainment  Management│ ← clickable
+│  │ Taeyong             Member  │ ← clickable
+│  │ MARK                Member  │ ← clickable
 │  │ ...                         │    │
 │  └─────────────────────────────┘    │
 └─────────────────────────────────────┘
 ```
 
-Cliccando una connessione, la selezione si sposta su quel nodo (navigazione nel grafo).
+Clicking a connection shifts the selection to that node (navigating through the graph).
 
 ---
 
-## 9. Mappa di Adiacenza (Ottimizzazione)
+## 9. Adjacency Map (Optimization)
 
-Pre-calcolata all'avvio per rispondere in O(1) alla domanda "quali nodi sono vicini a questo?":
+Pre-calculated at startup to answer in O(1) time: "which nodes are connected to this one?":
 
-```
+```js
 globalEdges.forEach(e => {
     const s = e.source, t = e.target;
     adjacency.get(s).add(t);  // s → t
@@ -402,74 +402,74 @@ globalEdges.forEach(e => {
 });
 ```
 
-Usata in:
-- **Hover**: evidenzia immediatamente i vicini del nodo sotto il mouse
-- **Selezione**: evidenzia i vicini del nodo selezionato
+Used in:
+- **Hover**: instantly highlight neighbors of the node under the cursor
+- **Selection**: highlight neighbors of the selected node
 
 ---
 
-## 10. Animazioni
+## 10. Animations
 
-### Centramento su nodo (panToNode)
+### Centering on a Node (panToNode)
 
 ```
-Posizione iniziale (transform.x, transform.y)
+Initial position (transform.x, transform.y)
          │
          ▼
-Calcola targetX, targetY per centrare il nodo
+Calculate targetX, targetY to center the node
          │
          ▼
 requestAnimationFrame(animate)
          │
          ▼
-Ogni frame: interpola transform verso target
-  t = (now - start) / durata (750ms)
+Each frame: interpolate transform towards target coordinates
+  t = (now - start) / duration (750ms)
   ease = 1 - (1-t)³  (cubic-out)
   transform.x = lerp(startX, targetX, ease)
   transform.y = lerp(startY, targetY, ease)
   draw()
          │
          ▼
-t >= 1 → stop animazione
+t >= 1 → animation stops
 ```
 
-### Reset zoom
+### Reset Zoom
 
-Stessa logica ma target = transform identità (x:0, y:0, k:1).
+Same logic but target is the identity transform (x: 0, y: 0, k: 1).
 
 ---
 
-## 11. Gestione Errori
+## 11. Error Handling
 
-Se i file CSV non sono accessibili:
+If CSV files are unreachable:
 
-```
+```js
 try {
     await d3.csv(path)
 } catch (error) {
-    // Mostra messaggio di errore nel DOM
+    // Show error message in DOM
     loading.innerHTML = `
-        Errore nel caricamento dei dati CSV.
-        Verifica che la cartella 'data' sia accessibile
-        e che il server locale sia avviato.
+        Error loading CSV data.
+        Please verify that the 'data' folder is accessible
+        and that the local server is running.
     `
 }
 ```
 
 ---
 
-## 12. Come Avviare
+## 12. How to Run
 
-1. Aprire un terminale nella cartella `visualizzazione dei dati/`
-2. Avviare un server HTTP locale (es. `npx serve .` o `python -m http.server 8000`)
-3. Aprire il browser su `http://localhost:8000/kpop-graph/`
-4. Attendere il caricamento dei file CSV
+1. Open a terminal in the `visualizzazione dei dati/` directory
+2. Start a local HTTP server (e.g., `npx serve .` or `python -m http.server 8000`)
+3. Open your browser at `http://localhost:8000/kpop-graph/`
+4. Wait for the CSV files to finish loading
 
 ---
 
-## Riferimenti
+## References
 
-- Tutto il codice: `kpop-graph/app.js` (~718 righe)
-- Interfaccia: `kpop-graph/index.html`
-- Documentazione ottimizzazioni: `kpop-graph/OTTIMIZZAZIONI.md`
-- Dati: `data/K-pop_node.csv` e `data/K-pop_edge.csv`
+- Main logic code: `kpop-graph/app.js` (modular files are under `kpop-graph/js/`)
+- User Interface: `kpop-graph/index.html`
+- Optimization documentation: `docs/OTTIMIZZAZIONI.md`
+- Data files: `data/K-pop_node.csv` and `data/K-pop_edge.csv`

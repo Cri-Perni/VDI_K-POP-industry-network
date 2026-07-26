@@ -1,61 +1,61 @@
-# Ottimizzazioni Performance — K-Pop Network Graph
+# Performance Optimizations — K-Pop Network Graph
 
-## Problema originale
+## Original Problem
 
-Con tutti i filtri attivi (~4674 nodi, ~5094 archi), l'applicazione lagava pesantemente:
-- **Hover**: scannerizzava tutti i 5000+ archi a ogni passaggio del mouse
-- **Simulazione fisica**: ripartiva da alta energia (alpha: 0.4) a ogni cambio filtro
-- **DOM SVG**: ~10.000 elementi DOM tra `<line>`, `<g>`, `<circle>`, `<text>` — ogni tick della simulazione aggiornava 24.700 attributi SVG
-- **Ricerca**: ricalcolava tutto a ogni keystroke senza debounce
-- **Parametri fisici**: troppo energetici per 4700+ nodi
+With all filters active (~4,674 nodes, ~5,094 edges), the application lagged heavily:
+- **Hover**: Scanned all 5,000+ edges on every mouse move
+- **Physics simulation**: Restarted from high energy (`alpha`: 0.4) on every filter change
+- **SVG DOM**: ~10,000 DOM elements among `<line>`, `<g>`, `<circle>`, `<text>` — every simulation tick updated 24,700 SVG attributes
+- **Search**: Recalculated everything on every keystroke without debouncing
+- **Physics parameters**: Too energetic for 4,700+ nodes
 
 ---
 
-## Ottimizzazione 1: Mappa di adiacenza (O(1) per hover/selezione)
+## Optimization 1: Adjacency Map (O(1) for hover/selection)
 
 **File:** `app.js:131-137`
 
-**Prima:** Ogni `mouseover` su un nodo iterava `self.linkSelection.each(l => ...)` — loop O(n) su tutti i 5000+ archi visibili per trovare i vicini.
+**Before:** Every `mouseover` on a node iterated over `self.linkSelection.each(l => ...)` — an O(n) loop over all 5,000+ visible edges to find neighbors.
 
-**Dopo:** Pre-calcolo una `Map<nodeId, Set<neighborId>>` all'`initialize()`. Hover e selezione fanno un lookup O(1):
+**After:** Pre-calculate an `adjacency` `Map<nodeId, Set<neighborId>>` during `initialize()`. Hover and selection now perform an O(1) lookup:
 
 ```js
 const connectedNodeIds = new Set(self.adjacency.get(d.id) || []);
 connectedNodeIds.add(d.id);
 ```
 
-**Impatto:** Da 5000+ iterazioni per hover a 1 lookup. Stessa ottimizzazione applicata a `applySelectionHighlight()`.
+**Impact:** From 5,000+ iterations per hover to a single lookup. The same optimization was applied to `applySelectionHighlight()`.
 
 ---
 
-## Ottimizzazione 2: Canvas 2D (rimuove DOM SVG)
+## Optimization 2: 2D Canvas (removes SVG DOM)
 
 **File:** `app.js:156-192` (`initCanvas`), `194-313` (`draw`)
 
-**Prima:** D3.js creava elementi SVG (`<line>`, `<g>`, `<circle>`, `<text>`) tramite data join (`enter/exit/merge`). Ogni tick della simulazione aggiornava attributi SVG di 10.000+ elementi.
+**Before:** D3.js created SVG elements (`<line>`, `<g>`, `<circle>`, `<text>`) via data join (`enter/exit/merge`). Every simulation tick updated the SVG attributes of 10,000+ elements.
 
-**Dopo:** Canvas 2D API per il rendering. La simulazione D3-force resta per il calcolo delle posizioni, ma il rendering avviene su `<canvas>`:
+**After:** 2D Canvas API for rendering. The D3-force simulation is kept for position calculation, but rendering is done directly on a `<canvas>`:
 
-| Aspetto | SVG | Canvas |
+| Aspect | SVG | Canvas |
 |---|---|---|
-| Elementi DOM | ~10.000 | 1 (`<canvas>`) |
-| Aggiornamenti per tick | 24.700 attr DOM | `clearRect` + `arc`/`lineTo` |
+| DOM Elements | ~10,000 | 1 (`<canvas>`) |
+| Updates per Tick | 24,700 DOM attributes | `clearRect` + `arc`/`lineTo` |
 | Zoom/Pan | D3 zoom + `<g transform>` | `ctx.translate`/`scale` |
-| Eventi | 4700 handler D3 | 1 canvas handler + hit detection |
-| Rendering fuori schermo | Sempre renderizzato | Viewport culling (skip nodi fuori finestra) |
-| Label a basso zoom | Sempre visibili | Nascoste quando zoom < 0.4x |
+| Events | 4,700 D3 handlers | 1 canvas handler + hit detection |
+| Off-screen Rendering | Always rendered | Viewport culling (skips nodes outside window) |
+| Labels at Low Zoom | Always visible | Hidden when zoom < 0.4x |
 
-**Impatto:** 60fps anche con 4700+ nodi. Nessun reflow/repaint del browser.
+**Impact:** 60fps even with 4,700+ nodes. No browser reflow/repaint.
 
 ---
 
-## Ottimizzazione 3: Simulazione non riparte quando nascondi nodi
+## Optimization 3: Simulation does not restart when hiding nodes
 
 **File:** `app.js:328-349`
 
-**Prima:** Ogni cambio filtro chiamava `simulation.alpha(0.4).restart()` — la simulazione ripartiva da alta energia e impiegava secondi a stabilizzarsi.
+**Before:** Every filter change called `simulation.alpha(0.4).restart()` — the simulation restarted with high energy and took seconds to stabilize.
 
-**Dopo:** Tracciamento del conteggio nodi (`_prevNodeCount`). Se stai solo **nascondendo** nodi, la simulazione continua con energia minima (alpha 0.03). Se stai **aggiungendo** nodi, usa alpha 0.15:
+**After:** Track the node count (`_prevNodeCount`). If nodes are only being **hidden**, the simulation continues with minimal energy (alpha 0.03). If nodes are being **added**, it uses alpha 0.15:
 
 ```js
 if (isAddingNodes) {
@@ -65,32 +65,32 @@ if (isAddingNodes) {
 }
 ```
 
-**Impatto:** Cambi filtro istantanei quando togli spunte.
+**Impact:** Instant filter changes when unchecking boxes.
 
 ---
 
-## Ottimizzazione 4: Parametri fisici ridotti
+## Optimization 4: Reduced physical parameters
 
 **File:** `app.js:37-41`
 
-| Parametro | Prima | Dopo |
+| Parameter | Before | After |
 |---|---|---|
 | `chargeStrength` | -140 | -80 |
 | `collisionRadius` | 28 | 18 |
 | `alphaTargetDrag` | 0.2 | 0.15 |
 | `alphaUpdateRestart` | 0.4 | 0.15 |
 
-**Impatto:** La simulazione si stabilizza molto più velocemente con 4700+ nodi. Meno energia = meno tick = CPU libera prima.
+**Impact:** The simulation stabilizes much faster with 4,700+ nodes. Less energy = fewer ticks = CPU freed earlier.
 
 ---
 
-## Ottimizzazione 5: Debounce ricerca (80ms)
+## Optimization 5: Debounced search (80ms)
 
 **File:** `app.js:601-605`
 
-**Prima:** Ogni keystroke attivava `applySearchHighlight()` che iterava tutti i nodi e aggiornava lo stile SVG.
+**Before:** Every keystroke triggered `applySearchHighlight()`, which iterated through all nodes and updated SVG styles.
 
-**Dopo:** Debounce di 80ms prima di eseguire la ricerca. Il callback legge `input.value` direttamente (non l'evento, evitando race condition):
+**After:** Debounce of 80ms before executing the search. The callback reads `input.value` directly (not the event, preventing race conditions):
 
 ```js
 let searchTimeout;
@@ -100,15 +100,15 @@ input.addEventListener("input", () => {
 });
 ```
 
-**Impatto:** Ricerca fluida senza lag durante la digitazione rapida. Il pulsante "X" resetta immediatamente (senza debounce).
+**Impact:** Smooth search without lag during rapid typing. The "X" button resets immediately (no debounce).
 
 ---
 
-## Ottimizzazione 6: Viewport culling
+## Optimization 6: Viewport culling
 
 **File:** `app.js:242-247`
 
-Calcolo dei bound visibili in coordinate mondo. Nodi fuori dal viewport (con margine 60px) non vengono renderizzati:
+Calculate visible bounds in world coordinates. Nodes outside the viewport (with a 60px margin) are not rendered:
 
 ```js
 const vp = {
@@ -121,17 +121,17 @@ const vp = {
 if (n.x < vp.x || n.x > vp.x + vp.w || n.y < vp.y || n.y > vp.y + vp.h) continue;
 ```
 
-**Impatto:** Zoomando su una zona specifica, solo i nodi in quella zona vengono disegnati.
+**Impact:** When zoomed into a specific area, only the nodes in that area are drawn.
 
 ---
 
-## Ottimizzazione 7: Hit detection custom
+## Optimization 7: Custom hit detection
 
 **File:** `app.js:376-390`
 
-**Prima:** D3.js gestiva eventi `mouseover`/`click` su ogni elemento SVG.
+**Before:** D3.js handled `mouseover`/`click` events on every SVG element.
 
-**Dopo:** Un singolo listener `mousemove`/`click` sul canvas. `findNodeAt()` cerca il nodo più vicino entro il raggio del cerchio + 3px:
+**After:** A single `mousemove`/`click` listener on the canvas. `findNodeAt()` searches for the closest node within the circle radius + 3px:
 
 ```js
 findNodeAt(wx, wy) {
@@ -149,29 +149,29 @@ findNodeAt(wx, wy) {
 }
 ```
 
-**Impatto:** Unico handler invece di 4700. O(n) su 4700 nodi è ~0.5ms.
+**Impact:** Single handler instead of 4,700. O(n) on 4,700 nodes takes ~0.5ms.
 
 ---
 
-## Ottimizzazione 8: Zoom/Pan custom con requestAnimationFrame
+## Optimization 8: Custom Zoom/Pan with requestAnimationFrame
 
 **File:** `app.js:466-480` (wheel), `637-657` (reset), `659-680` (panToNode)
 
-**Prima:** D3 zoom con SVG `<g transform>`.
+**Before:** D3 zoom with SVG `<g transform>`.
 
-**Dopo:** Trasformazione canvas con zoom verso il puntatore del mouse e animazioni smooth con `requestAnimationFrame` e easing cubic-out.
+**After:** Canvas transformation zooming towards the mouse pointer and smooth animations with `requestAnimationFrame` and cubic-out easing.
 
-**Impatto:** Zoom/pan senza reflow DOM, animazioni fluide.
+**Impact:** Zoom/pan without DOM reflow, fluid animations.
 
 ---
 
-## Riepilogo impatto
+## Impact Summary
 
-| Metrica | Prima (SVG) | Dopo (Canvas) | Miglioramento |
+| Metric | Before (SVG) | After (Canvas) | Improvement |
 |---|---|---|---|
-| Elementi DOM | ~10.000 | 1 | ~10.000x |
-| Hover response | ~10ms (O edges) | ~0.1ms (O(1)) | ~100x |
-| Tick rendering | 5-10ms (attributi DOM) | 1-3ms (Canvas draw) | ~5x |
-| Cambio filtro | 100-300ms (riavvio simulazione) | 10-50ms (no restart) | ~5-10x |
-| Ricerca (keystroke) | 10-20ms (nessun debounce) | ~1ms (80ms debounce) | ~10x percepito |
-| Zoom/pan | lag sui frame iniziali | 60fps stabili | Fluido |
+| DOM Elements | ~10,000 | 1 | ~10,000x |
+| Hover response | ~10ms (O(edges)) | ~0.1ms (O(1)) | ~100x |
+| Tick rendering | 5-10ms (DOM attributes) | 1-3ms (Canvas draw) | ~5x |
+| Filter change | 100-300ms (simulation restart) | 10-50ms (no restart) | ~5-10x |
+| Search (keystroke) | 10-20ms (no debounce) | ~1ms (80ms debounce) | ~10x perceived |
+| Zoom/pan | lag on initial frames | Stable 60fps | Fluid |
