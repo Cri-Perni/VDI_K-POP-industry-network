@@ -54,7 +54,6 @@ The system models the connections between major **record labels (agencies)**, **
 ```
 visualizzazione dei dati/
 ├── README.md                      # Main project documentation
-├── Progetto                       # Brief description of the data domain
 ├── data/                          # Source CSV dataset
 │   ├── K-pop_node.csv             # Node definitions (id, name, type)
 │   └── K-pop_edge.csv             # Relationship definitions (source, target)
