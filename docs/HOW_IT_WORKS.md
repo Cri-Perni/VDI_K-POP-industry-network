@@ -471,5 +471,5 @@ try {
 
 - Main logic code: `kpop-graph/app.js` (modular files are under `kpop-graph/js/`)
 - User Interface: `kpop-graph/index.html`
-- Optimization documentation: `docs/OTTIMIZZAZIONI.md`
+- Optimization documentation: `docs/OPTIMIZATIONS.md`
 - Data files: `data/K-pop_node.csv` and `data/K-pop_edge.csv`

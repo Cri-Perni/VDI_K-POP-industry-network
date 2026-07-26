@@ -64,9 +64,9 @@ visualizzazione dei dati/
 │   ├── K-pop_node.csv             # Node definitions (id, name, type)
 │   └── K-pop_edge.csv             # Relationship definitions (source, target)
 ├── docs/                          # Technical documentation and media
-│   ├── DOCUMENTO_TECNICO.md       # Technical project report
-│   ├── FUNZIONAMENTO.md           # Architectural/how-it-works guide
-│   ├── OTTIMIZZAZIONI.md          # Performance optimization notes
+│   ├── TECHNICAL_DOCUMENT.md      # Technical project report
+│   ├── HOW_IT_WORKS.md            # Architectural/how-it-works guide
+│   ├── OPTIMIZATIONS.md           # Performance optimization notes
 │   └── screenshots/               # Folder for application screenshots
 │       ├── .gitkeep
 │       ├── 2d-network-view.png    # [Placeholder] 2D Screenshot
