@@ -62,11 +62,6 @@ visualizzazione dei dati/
 │   ├── HOW_IT_WORKS.md            # Architectural/how-it-works guide
 │   ├── OPTIMIZATIONS.md           # Performance optimization notes
 │   └── screenshots/               # Folder for application screenshots
-│       ├── .gitkeep
-│       ├── 2d-network-view.png    # [Placeholder] 2D Screenshot
-│       ├── 3d-network-view.png    # [Placeholder] 3D Screenshot
-│       └── search-and-details.png # [Placeholder] Search/Details Screenshot
-├── kpop-graph/                    # Web application source code
 │   ├── index.html                 # HTML structure of the application
 │   ├── style.css                  # Custom styles and CSS utilities
 │   └── js/                        # ES6 JavaScript modules
