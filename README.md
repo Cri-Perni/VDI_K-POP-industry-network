@@ -6,11 +6,6 @@ The system models the connections between major **record labels (agencies)**, **
 
 ---
 
-## 📸 Preview and Screenshots
-
-> [!NOTE]
-> *Application screenshots can be placed in the [`docs/screenshots/`](./docs/screenshots/) folder using the filenames specified below.*
-
 ### 🎨 2D Visualization (Canvas API & D3 Force)
 ![K-Pop Graph 2D View](./docs/screenshots/2d-network-view.png)
 *High-performance, force-directed two-dimensional visualization rendered using the Canvas 2D API. Supports zoom, pan, node dragging, and highlighting of first-level neighbors.*
