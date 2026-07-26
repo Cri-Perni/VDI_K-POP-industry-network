@@ -12,8 +12,14 @@ export const selectionMixin = {
         const adj = this.adjacency.get(node.id);
         if (adj) adj.forEach(id => this.connectedNodeIds.add(id));
 
-        this.draw();
-        this.panToNode(node);
+        if (this.viewMode === "3D") {
+            this.updateDepthControlState();
+            this.update3DGraph();
+            this.panToNode3D(node);
+        } else {
+            this.draw();
+            this.panToNode(node);
+        }
     },
 
     clearNodeSelection() {
@@ -21,10 +27,15 @@ export const selectionMixin = {
         this.dom.detailsBox.classList.add("hidden");
         this.connectedNodeIds.clear();
 
-        if (this.searchQuery) {
-            this.applySearchHighlight();
+        if (this.viewMode === "3D") {
+            this.updateDepthControlState();
+            this.update3DGraph();
         } else {
-            this.draw();
+            if (this.searchQuery) {
+                this.applySearchHighlight();
+            } else {
+                this.draw();
+            }
         }
     },
 
@@ -40,13 +51,17 @@ export const selectionMixin = {
         this.dom.detailTypeBadge.className = `px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider ${badgeDef.css}`;
 
         const currentLinks = [];
-        const activeEdges = this.getActiveEdges();
-        for (const e of activeEdges) {
+        const edgesToInspect = this.viewMode === "3D" ? this.globalEdges : this.getActiveEdges();
+        
+        for (const e of edgesToInspect) {
             const srcId = e.source.id || e.source;
             const tgtId = e.target.id || e.target;
             if (srcId === node.id || tgtId === node.id) {
-                const neighbor = srcId === node.id ? e.target : e.source;
-                currentLinks.push({ neighbor: neighbor, relation: e.relation });
+                const neighborId = srcId === node.id ? tgtId : srcId;
+                const neighbor = this.globalNodes.find(n => n.id === neighborId);
+                if (neighbor) {
+                    currentLinks.push({ neighbor: neighbor, relation: e.relation });
+                }
             }
         }
 

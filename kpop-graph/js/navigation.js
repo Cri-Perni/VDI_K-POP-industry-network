@@ -22,11 +22,15 @@ export const navigationMixin = {
     },
 
     panToNode(node) {
-        const targetX = this.canvasW / 2 - node.x * this.transform.k;
-        const targetY = this.canvasH / 2 - node.y * this.transform.k;
+        if (!node || node.x === undefined || node.y === undefined) return;
 
-        const startX = this.transform.x;
-        const startY = this.transform.y;
+        const startK = this.transform.k;
+        const targetK = Math.max(startK, 1.2);
+
+        // Coordinate del mondo attualmente al centro dello schermo
+        const startWorldX = (this.canvasW / 2 - this.transform.x) / startK;
+        const startWorldY = (this.canvasH / 2 - this.transform.y) / startK;
+
         const startTime = performance.now();
         const duration = 750;
 
@@ -34,8 +38,13 @@ export const navigationMixin = {
             const t = Math.min((time - startTime) / duration, 1);
             const ease = 1 - Math.pow(1 - t, 3);
 
-            this.transform.x = startX + (targetX - startX) * ease;
-            this.transform.y = startY + (targetY - startY) * ease;
+            const currentWorldX = startWorldX + (node.x - startWorldX) * ease;
+            const currentWorldY = startWorldY + (node.y - startWorldY) * ease;
+            const currentK = startK + (targetK - startK) * ease;
+
+            this.transform.k = currentK;
+            this.transform.x = this.canvasW / 2 - currentWorldX * currentK;
+            this.transform.y = this.canvasH / 2 - currentWorldY * currentK;
             this.draw();
 
             if (t < 1) requestAnimationFrame(animate);

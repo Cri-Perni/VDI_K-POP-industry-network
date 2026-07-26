@@ -17,7 +17,14 @@ export const searchMixin = {
                     const adj = this.adjacency.get(this.selectedNode.id);
                     if (adj) adj.forEach(id => this.connectedNodeIds.add(id));
                 }
-                this.draw();
+                
+                if (this.viewMode === "3D") {
+                    if (this.graph3d) {
+                        this.graph3d.nodeColor(this.graph3d.nodeColor());
+                    }
+                } else {
+                    this.draw();
+                }
             } else {
                 clearBtn.classList.remove("hidden");
                 this.applySearchHighlight();
@@ -42,7 +49,9 @@ export const searchMixin = {
         if (!query) return;
 
         this.searchMatchedIds.clear();
-        for (const n of this.getActiveNodes()) {
+        const nodesToSearch = this.viewMode === "3D" ? this.globalNodes : this.getActiveNodes();
+
+        for (const n of nodesToSearch) {
             if (n.name.toLowerCase().includes(query) || n.id.toLowerCase().includes(query)) {
                 this.searchMatchedIds.add(n.id);
             }
@@ -57,6 +66,12 @@ export const searchMixin = {
             countDiv.innerHTML = `<span class='text-violet-400 font-semibold'>${count}</span> ${count === 1 ? 'nodo trovato' : 'nodi trovati'}`;
         }
 
-        this.draw();
+        if (this.viewMode === "3D") {
+            if (this.graph3d) {
+                this.graph3d.nodeColor(this.graph3d.nodeColor());
+            }
+        } else {
+            this.draw();
+        }
     }
 };
