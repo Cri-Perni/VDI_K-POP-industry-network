@@ -4,23 +4,28 @@ export const CONFIG = {
         edges: "../data/K-pop_edge.csv"
     },
     nodeColors: {
-        "label": "#ef4444",
-        "group": "#3b82f6",
-        "person": "#10b981",
-        "male": "#06b6d4",
-        "female": "#ec4899"
+        "label": "#f87171",
+        "group": "#60a5fa",
+        "person": "#34d399",
+        "male": "#38bdf8",
+        "female": "#f472b6"
     },
     typeBadges: {
-        label: { text: "Agenzia", css: "bg-red-500/20 text-red-400 border border-red-500/30" },
-        group: { text: "Gruppo", css: "bg-blue-500/20 text-blue-400 border border-blue-500/30" },
-        person: { text: "Idol", css: "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" },
-        male: { text: "Idol (M)", css: "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30" },
-        female: { text: "Idol (F)", css: "bg-pink-500/20 text-pink-400 border border-pink-500/30" }
+        label: { text: "Agenzia", css: "bg-red-500/20 text-red-300 border border-red-500/30" },
+        group: { text: "Gruppo", css: "bg-blue-500/20 text-blue-300 border border-blue-500/30" },
+        person: { text: "Idol", css: "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" },
+        male: { text: "Idol (M)", css: "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30" },
+        female: { text: "Idol (F)", css: "bg-pink-500/20 text-pink-300 border border-pink-500/30" }
     },
     edgeColors: {
-        management: "#ef4444",
-        membership: "#3b82f6",
-        association: "#10b981"
+        management: "#f87171",
+        membership: "#60a5fa",
+        association: "#34d399"
+    },
+    edgeWidths: {
+        management: 2.0,
+        membership: 1.3,
+        association: 0.8
     },
     nodeRadii: {
         label: 10,

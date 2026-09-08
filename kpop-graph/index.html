@@ -87,13 +87,25 @@
                 </div>
             </div>
 
-            <!-- Legenda -->
+            <!-- Filtri / Legenda Relazioni -->
             <div class="bg-slate-800 p-4 rounded-lg border border-slate-700">
-                <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400 mb-3">Legenda Relazioni</h2>
-                <div class="flex flex-col gap-2 text-xs">
-                    <div class="flex items-center gap-2"><span class="w-3 h-3 bg-[#ef4444] rounded-full"></span> Management (Label ➔ *)</div>
-                    <div class="flex items-center gap-2"><span class="w-3 h-3 bg-[#3b82f6] rounded-full"></span> Membership (Artist ➔ Group)</div>
-                    <div class="flex items-center gap-2"><span class="w-3 h-3 bg-[#10b981] rounded-full"></span> Association / Collab</div>
+                <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400 mb-3">Filtri / Legenda Relazioni</h2>
+                <div class="flex flex-col gap-2.5 text-xs" id="relation-filters">
+                    <label class="flex items-center gap-2 cursor-pointer select-none text-slate-300 hover:text-white transition-colors">
+                        <input type="checkbox" id="filter-rel-management" checked class="accent-violet-500 cursor-pointer">
+                        <span class="w-4 h-[3px] bg-[#f87171] rounded-full"></span>
+                        <span>Management (Label ➔ *)</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer select-none text-slate-300 hover:text-white transition-colors">
+                        <input type="checkbox" id="filter-rel-membership" checked class="accent-violet-500 cursor-pointer">
+                        <span class="w-4 h-[2px] bg-[#60a5fa] rounded-full"></span>
+                        <span>Membership (Artist ➔ Group)</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer select-none text-slate-300 hover:text-white transition-colors">
+                        <input type="checkbox" id="filter-rel-association" checked class="accent-violet-500 cursor-pointer">
+                        <span class="w-4 h-[1px] bg-[#34d399]/70 rounded-full"></span>
+                        <span>Association / Collab</span>
+                    </label>
                 </div>
             </div>
 

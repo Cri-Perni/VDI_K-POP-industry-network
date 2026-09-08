@@ -69,8 +69,12 @@ export const rendererMixin = {
         } else if (this.hoveredNode) {
             hasHighlight = true;
             highlightedIds.add(this.hoveredNode.id);
-            const adj = this.adjacency.get(this.hoveredNode.id);
-            if (adj) adj.forEach(id => highlightedIds.add(id));
+            for (const e of activeEdges) {
+                const srcId = e.source.id || e.source;
+                const tgtId = e.target.id || e.target;
+                if (srcId === this.hoveredNode.id) highlightedIds.add(tgtId);
+                else if (tgtId === this.hoveredNode.id) highlightedIds.add(srcId);
+            }
         }
 
         const nodeAlpha = (n) => {
@@ -92,14 +96,15 @@ export const rendererMixin = {
             h: this.canvasH / this.transform.k + 120
         };
 
-        ctx.lineWidth = 1;
         for (const e of activeEdges) {
             const src = e.source;
             const tgt = e.target;
             if (!src || !tgt) continue;
 
-            ctx.globalAlpha = edgeAlpha(e);
+            const baseAlpha = edgeAlpha(e);
+            ctx.globalAlpha = e.relation === "association" ? baseAlpha * 0.8 : baseAlpha;
             ctx.strokeStyle = CONFIG.edgeColors[e.relation] || CONFIG.edgeColors.association;
+            ctx.lineWidth = CONFIG.edgeWidths[e.relation] || 1;
             ctx.beginPath();
             ctx.moveTo(src.x, src.y);
             ctx.lineTo(tgt.x, tgt.y);
@@ -107,7 +112,6 @@ export const rendererMixin = {
         }
 
         ctx.globalAlpha = 1;
-        const showLabels = this.transform.k > 0.4;
 
         for (const n of activeNodes) {
             if (n.x < vp.x || n.x > vp.x + vp.w || n.y < vp.y || n.y > vp.y + vp.h) continue;
@@ -137,16 +141,36 @@ export const rendererMixin = {
             }
         }
 
-        if (showLabels) {
-            ctx.globalAlpha = 1;
-            ctx.font = "11px sans-serif";
+        const k = this.transform.k;
+        const showMajorLabels = k > 0.35;
+        const showAllLabels = k > 0.8;
+
+        if (showMajorLabels || hasHighlight) {
             ctx.textBaseline = "middle";
             for (const n of activeNodes) {
                 if (n.x < vp.x || n.x > vp.x + vp.w || n.y < vp.y || n.y > vp.y + vp.h) continue;
+
+                const isFocused = n === this.selectedNode || n === this.hoveredNode || (hasHighlight && highlightedIds.has(n.id));
+                const isMajor = n.type === "label" || n.type === "group";
+
+                // Mostra se è in focus, se è un'etichetta principale (con zoom adeguato) o con zoom ravvicinato
+                if (!isFocused && !showAllLabels && (!showMajorLabels || !isMajor)) continue;
+
                 const a = nodeAlpha(n);
+                if (a < 0.1) continue;
+
                 const radius = CONFIG.nodeRadii[n.type] || CONFIG.nodeRadii.default;
-                ctx.globalAlpha = a * 0.85;
-                ctx.fillStyle = "#94a3b8";
+
+                if (isFocused) {
+                    ctx.font = "600 11px 'Inter', system-ui, sans-serif";
+                    ctx.globalAlpha = 1;
+                    ctx.fillStyle = "#ffffff";
+                } else {
+                    ctx.font = "400 10px 'Inter', system-ui, sans-serif";
+                    ctx.globalAlpha = a * 0.75;
+                    ctx.fillStyle = "#cbd5e1";
+                }
+
                 ctx.fillText(n.name, n.x + radius + 4, n.y);
             }
         }

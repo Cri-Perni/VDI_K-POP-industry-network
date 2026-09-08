@@ -15,6 +15,8 @@ class KPopNetworkGraph {
         this.viewMode = "2D";
         this.relationDepth = 1;
         this.graph3d = null;
+        this._focus3dFrame = null;
+        this._focus3dRequestId = 0;
 
         this.selectedNode = null;
         this.searchQuery = "";
@@ -40,6 +42,9 @@ class KPopNetworkGraph {
             filterLabel: document.getElementById("filter-label"),
             filterGroup: document.getElementById("filter-group"),
             filterPerson: document.getElementById("filter-person"),
+            filterRelManagement: document.getElementById("filter-rel-management"),
+            filterRelMembership: document.getElementById("filter-rel-membership"),
+            filterRelAssociation: document.getElementById("filter-rel-association"),
             searchInput: document.getElementById("search-input"),
             searchClear: document.getElementById("search-clear"),
             searchResultsCount: document.getElementById("search-results-count"),
@@ -74,18 +79,17 @@ class KPopNetworkGraph {
     }
 
     setupListeners() {
-        this.dom.filterLabel.addEventListener("change", () => {
+        const onFilterChange = () => {
             if (this.viewMode === "3D") this.update3DGraph();
             else this.updateGraph();
-        });
-        this.dom.filterGroup.addEventListener("change", () => {
-            if (this.viewMode === "3D") this.update3DGraph();
-            else this.updateGraph();
-        });
-        this.dom.filterPerson.addEventListener("change", () => {
-            if (this.viewMode === "3D") this.update3DGraph();
-            else this.updateGraph();
-        });
+        };
+
+        this.dom.filterLabel.addEventListener("change", onFilterChange);
+        this.dom.filterGroup.addEventListener("change", onFilterChange);
+        this.dom.filterPerson.addEventListener("change", onFilterChange);
+        this.dom.filterRelManagement.addEventListener("change", onFilterChange);
+        this.dom.filterRelMembership.addEventListener("change", onFilterChange);
+        this.dom.filterRelAssociation.addEventListener("change", onFilterChange);
 
         this.dom.btnResetZoom.addEventListener("click", () => {
             if (this.viewMode === "3D") {

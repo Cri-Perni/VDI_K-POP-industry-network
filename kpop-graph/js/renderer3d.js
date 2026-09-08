@@ -21,7 +21,11 @@ export const renderer3dMixin = {
         try {
             this.graph3d = ForceGraph3D({ controlType: 'orbit' })(this.dom.container3d)
                 .backgroundColor('#090d16')
-                .nodeLabel('name')
+                .nodeLabel(node => {
+                    const badgeText = CONFIG.typeBadges[node.type]?.text || node.type;
+                    const color = CONFIG.nodeColors[node.type] || '#ffffff';
+                    return `<div style="background: rgba(15,23,42,0.92); color: #f8fafc; padding: 5px 9px; border-radius: 6px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; border: 1px solid rgba(148,163,184,0.25); box-shadow: 0 4px 12px rgba(0,0,0,0.5);"><span>${node.name}</span><span style="display: inline-block; margin-left: 6px; padding: 1px 6px; font-size: 10px; border-radius: 4px; background: ${color}25; color: ${color}; border: 1px solid ${color}40;">${badgeText}</span></div>`;
+                })
                 .nodeColor(node => {
                     // Se c'è una query di ricerca, illumina solo i nodi corrispondenti
                     if (this.searchQuery) {
@@ -45,9 +49,9 @@ export const renderer3dMixin = {
                     return baseRadius;
                 })
                 .nodeResolution(6) // Geometrie a bassi poligoni per performance estreme con 10k nodi
-                .linkWidth(1.5)
+                .linkWidth(link => CONFIG.edgeWidths?.[link.relation] || 1)
                 .linkColor(link => CONFIG.edgeColors[link.relation] || CONFIG.edgeColors.association)
-                .linkOpacity(0.7)
+                .linkOpacity(link => link.relation === "association" ? 0.45 : 0.75)
                 .showNavInfo(false)
                 .enableNodeDrag(false)
                 .enableNavigationControls(true)
@@ -92,17 +96,6 @@ export const renderer3dMixin = {
         }
 
         // Recupera i nodi attivi in base ai filtri correnti
-        const showLabel = this.dom.filterLabel.checked;
-        const showGroup = this.dom.filterGroup.checked;
-        const showPerson = this.dom.filterPerson.checked;
-
-        const isVisible = (type) => {
-            if (type === "label") return showLabel;
-            if (type === "group") return showGroup;
-            if (type === "person" || type === "male" || type === "female") return showPerson;
-            return true;
-        };
-
         const existingNodesMap = new Map();
         if (this.graph3d) {
             const prevData = this.graph3d.graphData();
@@ -114,7 +107,7 @@ export const renderer3dMixin = {
         }
 
         const filteredNodes = this.globalNodes
-            .filter(n => isVisible(n.type))
+            .filter(n => this.isNodeTypeVisible(n.type))
             .map(n => existingNodesMap.get(n.id) || n);
         const filteredNodeIds = new Set(filteredNodes.map(n => n.id));
 
@@ -133,8 +126,14 @@ export const renderer3dMixin = {
                 this.connectedNodeIds.add(s);
                 this.connectedNodeIds.add(t);
             });
+
+            // Rinfresca il pannello dettagli per riflettere le relazioni filtrate
+            this.showNodeDetails(this.selectedNode);
         } else {
             this.connectedNodeIds.clear();
+            if (this.selectedNode && !filteredNodeIds.has(this.selectedNode.id)) {
+                this.clearNodeSelection();
+            }
         }
 
         // 3D-Force-Graph muta gli oggetti link sostituendo gli ID con gli oggetti nodo reali.
@@ -168,14 +167,15 @@ export const renderer3dMixin = {
             const neighbors = this.adjacency.get(id);
             if (neighbors) {
                 for (const neighborId of neighbors) {
-                    // Controlla che il vicino sia visibile con i filtri attuali
+                    // Controlla che il vicino sia visibile con i filtri dei nodi attuali
                     if (!filteredNodeIds.has(neighborId)) continue;
 
-                    // Trova l'arco corrispondente
+                    // Trova l'arco corrispondente e controlla che la relazione sia visibile
                     const edge = this.globalEdges.find(e => {
                         const s = e.source.id || e.source;
                         const t = e.target.id || e.target;
-                        return (s === id && t === neighborId) || (s === neighborId && t === id);
+                        const matchesEndpoints = (s === id && t === neighborId) || (s === neighborId && t === id);
+                        return matchesEndpoints && this.isRelationVisible(e.relation);
                     });
 
                     if (edge) {
@@ -190,11 +190,11 @@ export const renderer3dMixin = {
                         if (!alreadyAdded) {
                             edgesToShow.push(edge);
                         }
-                    }
 
-                    if (!visited.has(neighborId)) {
-                        visited.add(neighborId);
-                        queue.push({ id: neighborId, depth: depth + 1 });
+                        if (!visited.has(neighborId)) {
+                            visited.add(neighborId);
+                            queue.push({ id: neighborId, depth: depth + 1 });
+                        }
                     }
                 }
             }
@@ -251,9 +251,9 @@ export const renderer3dMixin = {
             // Ricalcola e disegna il grafo 3D
             this.update3DGraph();
 
-            // Se c'era già un nodo selezionato, sposta la camera 3D su di esso
+            // Se c'era già un nodo selezionato, inquadra il suo sottografo visibile
             if (this.selectedNode) {
-                this.panToNode3D(this.selectedNode);
+                this.focusSubgraph3D();
             }
 
         } else {
@@ -303,48 +303,58 @@ export const renderer3dMixin = {
         }
     },
 
-    panToNode3D(node) {
-        if (!this.graph3d || !node) return;
+    focusSubgraph3D() {
+        if (!this.graph3d || !this.selectedNode) return;
 
-        const gData = this.graph3d.graphData();
-        const matchingNode = (gData.nodes && gData.nodes.find(n => n.id === node.id)) || node;
-
-        // Se le coordinate non sono ancora calcolate o valgano zero assoluto (inizializzazione non pronta),
-        // attendi un breve tick prima di eseguire l'inquadratura
-        if (matchingNode.x === undefined || matchingNode.y === undefined || matchingNode.z === undefined) {
-            setTimeout(() => this.panToNode3D(node), 100);
-            return;
+        // Attende il frame in cui il renderer ha applicato i dati aggiornati,
+        // evitando di calcolare il bounding box su coordinate obsolete.
+        if (this._focus3dFrame !== null) {
+            cancelAnimationFrame(this._focus3dFrame);
         }
 
-        const currentCamPos = this.graph3d.cameraPosition() || { x: 0, y: 0, z: 200 };
-        const controlsTarget = (typeof this.graph3d.controls === 'function' && this.graph3d.controls() && this.graph3d.controls().target)
-            ? this.graph3d.controls().target
-            : { x: 0, y: 0, z: 0 };
+        const focusRequestId = ++this._focus3dRequestId;
+        this._focus3dFrame = requestAnimationFrame(() => {
+            this._focus3dFrame = null;
 
-        // Vettore di direzione attuale dalla vista al target
-        let dx = currentCamPos.x - controlsTarget.x;
-        let dy = currentCamPos.y - controlsTarget.y;
-        let dz = currentCamPos.z - controlsTarget.z;
-        let len = Math.hypot(dx, dy, dz);
+            // Ignora il focus reso obsoleto da una selezione più recente.
+            if (focusRequestId !== this._focus3dRequestId || !this.graph3d || !this.selectedNode) return;
 
-        // Se la lunghezza è vicina a zero, imposta un vettore predefinito lungo l'asse Z
-        if (len < 0.001) {
-            dx = 0;
-            dy = 0;
-            dz = 1;
-            len = 1;
-        }
+            const focusNodeIds = new Set(this.connectedNodeIds);
+            focusNodeIds.add(this.selectedNode.id);
 
-        const targetDist = 120; // Distanza di messa a fuoco ottimale
-        const camX = matchingNode.x + (dx / len) * targetDist;
-        const camY = matchingNode.y + (dy / len) * targetDist;
-        const camZ = matchingNode.z + (dz / len) * targetDist;
+            const graphData = this.graph3d.graphData();
+            const hasVisibleFocusNode = graphData.nodes?.some(node => focusNodeIds.has(node.id));
+            if (!hasVisibleFocusNode) return;
 
-        this.graph3d.cameraPosition(
-            { x: camX, y: camY, z: camZ },
-            { x: matchingNode.x, y: matchingNode.y, z: matchingNode.z },
-            1000 // durata animazione in ms
-        );
+            // Prima calcola il bounding box del sottografo senza animazione,
+            // così possiamo ridurre la distanza mantenendo lo stesso centro.
+            this.graph3d.zoomToFit(
+                0,
+                32,
+                node => focusNodeIds.has(node.id)
+            );
+
+            const cameraPosition = this.graph3d.cameraPosition();
+            const controls = typeof this.graph3d.controls === 'function'
+                ? this.graph3d.controls()
+                : null;
+            const target = controls?.target || { x: 0, y: 0, z: 0 };
+
+            if (cameraPosition && Number.isFinite(cameraPosition.x) && Number.isFinite(cameraPosition.y) && Number.isFinite(cameraPosition.z)) {
+                const zoomInFactor = 0.5;
+                const closerPosition = {
+                    x: target.x + (cameraPosition.x - target.x) * zoomInFactor,
+                    y: target.y + (cameraPosition.y - target.y) * zoomInFactor,
+                    z: target.z + (cameraPosition.z - target.z) * zoomInFactor
+                };
+
+                this.graph3d.cameraPosition(
+                    closerPosition,
+                    { x: target.x, y: target.y, z: target.z },
+                    800
+                );
+            }
+        });
     },
 
     resetZoom3D() {

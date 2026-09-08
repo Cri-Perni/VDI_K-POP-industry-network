@@ -1,21 +1,39 @@
 import { CONFIG } from './config.js';
 
 export const selectionMixin = {
+    updateConnectedNodes() {
+        if (!this.selectedNode) {
+            this.connectedNodeIds.clear();
+            return;
+        }
+        this.connectedNodeIds.clear();
+        this.connectedNodeIds.add(this.selectedNode.id);
+
+        if (this.viewMode === "2D") {
+            const activeEdges = this.getActiveEdges();
+            for (const e of activeEdges) {
+                const srcId = e.source.id || e.source;
+                const tgtId = e.target.id || e.target;
+                if (srcId === this.selectedNode.id) {
+                    this.connectedNodeIds.add(tgtId);
+                } else if (tgtId === this.selectedNode.id) {
+                    this.connectedNodeIds.add(srcId);
+                }
+            }
+        }
+    },
+
     selectNode(node) {
         this.selectedNode = node;
         this.hoveredNode = null;
 
+        this.updateConnectedNodes();
         this.showNodeDetails(node);
-
-        this.connectedNodeIds.clear();
-        this.connectedNodeIds.add(node.id);
-        const adj = this.adjacency.get(node.id);
-        if (adj) adj.forEach(id => this.connectedNodeIds.add(id));
 
         if (this.viewMode === "3D") {
             this.updateDepthControlState();
             this.update3DGraph();
-            this.panToNode3D(node);
+            this.focusSubgraph3D();
         } else {
             this.draw();
             this.panToNode(node);
@@ -51,7 +69,18 @@ export const selectionMixin = {
         this.dom.detailTypeBadge.className = `px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider ${badgeDef.css}`;
 
         const currentLinks = [];
-        const edgesToInspect = this.viewMode === "3D" ? this.globalEdges : this.getActiveEdges();
+        let edgesToInspect = [];
+
+        if (this.viewMode === "3D") {
+            const visibleNodeIds = new Set(this.globalNodes.filter(n => this.isNodeTypeVisible(n.type)).map(n => n.id));
+            edgesToInspect = this.globalEdges.filter(e => {
+                const s = e.source.id || e.source;
+                const t = e.target.id || e.target;
+                return visibleNodeIds.has(s) && visibleNodeIds.has(t) && this.isRelationVisible(e.relation);
+            });
+        } else {
+            edgesToInspect = this.getActiveEdges();
+        }
         
         for (const e of edgesToInspect) {
             const srcId = e.source.id || e.source;
