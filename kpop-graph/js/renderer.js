@@ -20,13 +20,7 @@ export const rendererMixin = {
 
         this.ctx = this.canvas.getContext("2d");
 
-        this.simulation = d3.forceSimulation()
-            .force("link", d3.forceLink().id(d => d.id).distance(CONFIG.forces.linkDistance))
-            .force("charge", d3.forceManyBody().strength(CONFIG.forces.chargeStrength))
-            .force("center", d3.forceCenter(width / 2, height / 2))
-            .force("collision", d3.forceCollide().radius(CONFIG.forces.collisionRadius));
-
-        this.simulation.on("tick", () => this.draw());
+        this.initPhysics();
 
         this.canvas.addEventListener("mousedown", (e) => this.onMouseDown(e));
         this.canvas.addEventListener("mousemove", (e) => this.onMouseMove(e));
@@ -162,16 +156,23 @@ export const rendererMixin = {
                 const radius = CONFIG.nodeRadii[n.type] || CONFIG.nodeRadii.default;
 
                 if (isFocused) {
-                    ctx.font = "600 11px 'Inter', system-ui, sans-serif";
+                    const isSelected = n === this.selectedNode;
+                    ctx.font = isSelected ? "700 13px 'Inter', system-ui, sans-serif" : "600 11px 'Inter', system-ui, sans-serif";
+                    ctx.strokeStyle = "rgba(15, 23, 42, 0.95)";
+                    ctx.lineWidth = isSelected ? 4 : 3;
+                    ctx.strokeText(n.name, n.x + radius + 5, n.y);
                     ctx.globalAlpha = 1;
-                    ctx.fillStyle = "#ffffff";
+                    ctx.fillStyle = isSelected ? "#facc15" : "#ffffff";
+                    ctx.fillText(n.name, n.x + radius + 5, n.y);
                 } else {
                     ctx.font = "400 10px 'Inter', system-ui, sans-serif";
-                    ctx.globalAlpha = a * 0.75;
+                    ctx.strokeStyle = "rgba(15, 23, 42, 0.85)";
+                    ctx.lineWidth = 2.5;
+                    ctx.strokeText(n.name, n.x + radius + 4, n.y);
+                    ctx.globalAlpha = a * 0.85;
                     ctx.fillStyle = "#cbd5e1";
+                    ctx.fillText(n.name, n.x + radius + 4, n.y);
                 }
-
-                ctx.fillText(n.name, n.x + radius + 4, n.y);
             }
         }
 

@@ -33,9 +33,7 @@ export const interactionMixin = {
         if (node) {
             this.dragState.active = true;
             this.dragState.node = node;
-            node.fx = node.x;
-            node.fy = node.y;
-            this.simulation.alphaTarget(CONFIG.forces.alphaTargetDrag).restart();
+            this.startDragNode(node, node.x, node.y);
         } else {
             this.dragState.active = true;
             this.dragState.node = null;
@@ -51,8 +49,8 @@ export const interactionMixin = {
 
         if (this.dragState.active) {
             if (this.dragState.node) {
-                this.dragState.node.fx = pos.x;
-                this.dragState.node.fy = pos.y;
+                this.moveDragNode(this.dragState.node, pos.x, pos.y);
+                this.draw();
             } else {
                 this.transform.x = this.dragState.panStartX + (e.clientX - this.dragState.startX);
                 this.transform.y = this.dragState.panStartY + (e.clientY - this.dragState.startY);
@@ -73,9 +71,7 @@ export const interactionMixin = {
     onMouseUp() {
         if (!this.dragState.active) return;
         if (this.dragState.node) {
-            this.dragState.node.fx = null;
-            this.dragState.node.fy = null;
-            this.simulation.alphaTarget(0);
+            this.endDragNode(this.dragState.node);
         }
         this.dragState.active = false;
         this.dragState.node = null;

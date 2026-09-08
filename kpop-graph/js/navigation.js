@@ -25,7 +25,15 @@ export const navigationMixin = {
         if (!node || node.x === undefined || node.y === undefined) return;
 
         const startK = this.transform.k;
-        const targetK = Math.max(startK, 1.2);
+        let targetK = 1.3;
+        if (node.type === "label") {
+            // Per le grandi agenzie allargate, inquadratura panoramica ideale per la costellazione
+            targetK = 0.95;
+        } else if (node.type === "group") {
+            targetK = 1.2;
+        } else {
+            targetK = 1.4;
+        }
 
         // Coordinate del mondo attualmente al centro dello schermo
         const startWorldX = (this.canvasW / 2 - this.transform.x) / startK;

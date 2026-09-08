@@ -74,8 +74,21 @@ export const renderer3dMixin = {
                 if (controls.enablePan !== undefined) controls.enablePan = true;
             }
 
-            // Imposta la forza di repulsione dei nodi per allontanarli bene in 3D (evita sovrapposizioni)
-            this.graph3d.d3Force('charge').strength(-40);
+            // Imposta la forza di repulsione e distanza legami dei nodi per allontanarli bene in 3D (evita sovrapposizioni)
+            this.graph3d.d3Force('charge').strength(node => {
+                if (node.type === 'label') return -300;
+                if (node.type === 'group') return -130;
+                return -50;
+            });
+
+            const linkForce = this.graph3d.d3Force('link');
+            if (linkForce) {
+                linkForce.distance(link => {
+                    if (link.relation === 'management') return 175;
+                    if (link.relation === 'membership') return 90;
+                    return 65;
+                });
+            }
 
             // Gestione resize finestra
             window.addEventListener("resize", () => {
@@ -228,9 +241,7 @@ export const renderer3dMixin = {
             }
 
             // Sospende la simulazione 2D per preservare CPU
-            if (this.simulation) {
-                this.simulation.stop();
-            }
+            this.stopPhysics();
 
             // Nasconde il canvas 2D
             if (this.canvas) {
@@ -277,9 +288,7 @@ export const renderer3dMixin = {
             }
 
             // Riattiva e riscalda la simulazione 2D
-            if (this.simulation) {
-                this.simulation.alpha(0.3).restart();
-            }
+            this.restartPhysics(0.3);
 
             // Sincronizza lo slider
             this.updateDepthControlState();

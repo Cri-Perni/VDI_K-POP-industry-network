@@ -40,14 +40,7 @@ export const filtersMixin = {
             }
         }
 
-        this.simulation.nodes(filteredNodes);
-        this.simulation.force("link").links(filteredEdges);
-
-        if (isAddingNodes) {
-            this.simulation.alpha(CONFIG.forces.alphaUpdateRestart).restart();
-        } else {
-            this.simulation.alpha(0.03).restart();
-        }
+        this.updatePhysicsData(filteredNodes, filteredEdges, isAddingNodes);
 
         if (this.searchQuery) {
             this.applySearchHighlight();

@@ -33,9 +33,22 @@ export const CONFIG = {
         default: 5.5
     },
     forces: {
-        chargeStrength: -80,
-        linkDistance: 75,
-        collisionRadius: 18,
+        chargeStrength: {
+            label: -450,
+            group: -160,
+            default: -65
+        },
+        linkDistance: {
+            management: 190,
+            membership: 90,
+            association: 75,
+            default: 80
+        },
+        collisionRadius: {
+            label: 38,
+            group: 22,
+            default: 14
+        },
         alphaTargetDrag: 0.15,
         alphaUpdateRestart: 0.15
     }

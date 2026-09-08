@@ -6,6 +6,7 @@ import { navigationMixin } from './navigation.js';
 import { searchMixin } from './search.js';
 import { selectionMixin } from './selection.js';
 import { filtersMixin } from './filters.js';
+import { physicsMixin } from './physics.js';
 
 class KPopNetworkGraph {
     constructor() {
@@ -35,6 +36,11 @@ class KPopNetworkGraph {
         this.searchMatchedIds = new Set();
 
         this.simulation = null;
+        this.activeNodes = [];
+        this.activeEdges = [];
+        this.useWorker = false;
+        this.worker = null;
+        this.isWorkerActive = false;
 
         this.dom = {
             container: document.getElementById("canvas-container"),
@@ -137,7 +143,7 @@ class KPopNetworkGraph {
         this.setupSearch();
 
         window.addEventListener("resize", () => {
-            if (!this.canvas || !this.simulation) return;
+            if (!this.canvas) return;
             const container = this.dom.container;
             const width = container.clientWidth;
             const height = container.clientHeight;
@@ -149,19 +155,16 @@ class KPopNetworkGraph {
             this.canvas.height = height * dpr;
             this.canvas.style.width = width + "px";
             this.canvas.style.height = height + "px";
-            this.simulation.force("center", d3.forceCenter(width / 2, height / 2));
-            this.simulation.alpha(0.1).restart();
+            this.resizePhysics(width, height);
         });
     }
 
     getActiveNodes() {
-        return this.simulation ? this.simulation.nodes() : [];
+        return this.activeNodes || [];
     }
 
     getActiveEdges() {
-        if (!this.simulation) return [];
-        const f = this.simulation.force("link");
-        return f ? f.links() : [];
+        return this.activeEdges || [];
     }
 }
 
@@ -174,7 +177,8 @@ Object.assign(
     navigationMixin,
     searchMixin,
     selectionMixin,
-    filtersMixin
+    filtersMixin,
+    physicsMixin
 );
 
 export { KPopNetworkGraph };
