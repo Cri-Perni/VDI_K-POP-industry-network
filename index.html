@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Intorni K-pop</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app">
+  <aside id="side">
+    <h1>Intorni K-pop</h1>
+    <p class="lead">Scegli da chi partire, escludi ciò che non ti piace e guarda chi si collega a chi.</p>
+
+    <section>
+      <h2>Cerca</h2>
+      <input id="q" type="search" placeholder="Nome o id: EXO, 도경수, 152" autocomplete="off" aria-label="Cerca un artista, un gruppo o un'agenzia">
+      <ul id="results" class="rows" aria-live="polite"></ul>
+    </section>
+
+    <section>
+      <h2>Partenza <span class="count" id="n-seeds"></span></h2>
+      <div id="seeds" class="chips"></div>
+    </section>
+
+    <section>
+      <h2>Sfavoriti <span class="count" id="n-blocked"></span></h2>
+      <div id="blocked" class="chips"></div>
+    </section>
+
+    <section>
+      <h2>Parametri</h2>
+      <label class="field">
+        <span>Distanza massima <output id="r-out"></output></span>
+        <input id="radius" type="range" min="1" max="4" step="1" value="2">
+      </label>
+      <label class="field">
+        <span>Agenzie (label)</span>
+        <select id="labelMode">
+          <option value="through">Fanno da ponte</option>
+          <option value="endpoint">Visibili, ma non fanno da ponte</option>
+          <option value="hide">Nascoste</option>
+        </select>
+        <p class="help">Un'agenzia collega centinaia di artisti: se fa da ponte, l'intorno cresce in fretta.</p>
+      </label>
+      <label class="check"><input type="checkbox" id="showBridges" checked> Evidenzia i nodi in comune</label>
+      <label class="field">
+        <span>Un nodo è in comune se lo raggiungono</span>
+        <select id="commonMode">
+          <option value="all">tutte le partenze</option>
+          <option value="two">almeno due partenze</option>
+        </select>
+      </label>
+      <label class="check"><input type="checkbox" id="showNames"> Mostra tutti i nomi</label>
+    </section>
+
+    <section>
+      <h2>Risultato</h2>
+      <dl id="stats"></dl>
+      <ul id="legend"></ul>
+      <div id="commonsBox" hidden>
+        <h2 class="sub-h">Nodi in comune</h2>
+        <div id="commons" class="chips"></div>
+      </div>
+      <h2 class="sub-h">Hub dell'intorno</h2>
+      <p class="help">I nodi più collegati: sfavorirli accorcia i giri.</p>
+      <ul id="hubs" class="rows"></ul>
+      <div class="ringkey">
+        <span><i class="k-seed"></i>Partenza</span>
+        <span><i class="k-bridge"></i>In comune alle partenze</span>
+      </div>
+    </section>
+
+    <section>
+      <h2>Esempi</h2>
+      <p class="help" style="margin-top:0">Due partenze, agenzie che fanno da ponte:</p>
+      <div class="btnrow">
+        <button class="btn" data-preset="a">EXO e SHINee</button>
+        <button class="btn" data-preset="b">Come sopra, senza S.M.</button>
+      </div>
+      <p class="help">Quattro artisti di quattro gruppi (BEAST, 4minute, Brown Eyed Girls, BIGBANG):</p>
+      <div class="btnrow">
+        <button class="btn" data-preset="c">Nessun blocco</button>
+        <button class="btn" data-preset="d">Evitando Shinsadong Tiger</button>
+        <button class="btn" data-preset="e">Evitando anche Hyuna</button>
+      </div>
+      <div class="btnrow" style="margin-top:12px"><button class="btn" data-preset="reset">Ricomincia</button></div>
+    </section>
+  </aside>
+
+  <main id="stage">
+    <canvas id="cv" role="img" aria-label="Grafico dell'intorno dei nodi scelti"></canvas>
+    <div id="tip" hidden></div>
+    <div id="detail" hidden></div>
+    <div id="msg" hidden></div>
+    <p id="hint">Trascina lo sfondo per spostarti, rotella per lo zoom, doppio clic per partire da un nodo, clic destro per sfavorirlo.</p>
+    <div id="tools"><button class="btn" id="fit">Adatta alla vista</button></div>
+  </main>
+</div>
+
+<script src="vendor/d3.v7.min.js"></script>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

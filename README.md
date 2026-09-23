@@ -1,123 +1,114 @@
-# 🇰🇷 K-Pop Network Analysis — Visualizing the K-Pop Industry
+# Intorni K-pop
 
-An advanced, interactive web application for exploring and visualizing the relationship network within the **Korean Pop (K-Pop)** music industry.
+Visualizzatore interattivo della rete di collegamenti tra artisti, gruppi
+e agenzie K-pop. Parti da uno o più nodi, escludi ciò che non ti interessa,
+e osserva l'intorno che si forma con un grafo a forze su canvas.
 
-The system models the connections between major **record labels (agencies)**, **music groups**, and **individual artists (idols)** through interactive graphs in **2D and 3D modes**, enabling in-depth analysis of corporate structures, group memberships, and artistic collaborations.
+## Uso
 
----
+L'app è composta da file statici (nessun bundler, nessuna build). Il
+dataset viene caricato con `fetch`, che i browser bloccano se apri il file
+`index.html` direttamente (`file://`): serve un server HTTP locale, anche
+minimo.
 
-### 🎨 2D Visualization (Canvas API & D3 Force)
-![K-Pop Graph 2D View](./docs/screenshots/2d-network-view.png)
-*High-performance, force-directed two-dimensional visualization rendered using the Canvas 2D API. Supports zoom, pan, node dragging, and highlighting of first-level neighbors.*
+Dalla cartella del progetto:
 
----
-
-### 🌐 3D Visualization (WebGL & Orbit Controls)
-![K-Pop Graph 3D View](./docs/screenshots/3d-network-view.png)
-*High-framerate 3D WebGL visualization featuring 360° orbit controls, spatial simulation, a floating UI direction widget, and a BFS depth slider for exploring relational hops.*
-
----
-
-### 🔍 Search and Entity Details
-![Search and Entity Details Card](./docs/screenshots/search-and-details.png)
-*Instant search panel with real-time highlighting, entity type filtering, and an interactive info card for navigating connected relationships.*
-
----
-
-## ✨ Key Features
-
-* **Dual-Mode 2D & 3D:** Instant toggle between the 2D view (Canvas API + D3.js) and the 3D view (WebGL + Three.js / Orbit Controls).
-* **Full 3D Orbit Controls:** 360° 3D camera control with a fixed axis (Pole Lock) and a floating navigation widget with directional arrows (◄ ► ▲ ▼) for guided orientation.
-* **Dynamic Relational Depth (BFS Hops):** A slider in 3D mode to explore the network of connections around a selected node at a scalable depth (from 1 to 4 hops away).
-* **Entity Type Filters:** Ability to dynamically filter graph nodes by:
-  * 🏢 **Agencies (Labels):** *e.g., SM Entertainment, HYBE, YG, JYP*
-  * 👥 **Music Groups:** *e.g., BTS, BLACKPINK, EXO, TWICE*
-  * 👤 **Idols / People:** *Individual male and female artists*
-* **Debounced Instant Search:** Real-time search by entity name with visual isolation of matching results.
-* **Smooth Focus & Target Tracking:** Automatic, smooth camera transition centering on the selected node in both 2D and 3D views.
-* **Interactive Details Card:** A dynamic sidebar showing the entity type, count of active relationships, and a clickable list of all direct connections.
-
----
-
-## 🛠️ Technology Stack
-
-* **Frontend Logic:** Modular ES6 JavaScript (Mixin Architecture: `data.js`, `renderer.js`, `renderer3d.js`, `navigation.js`, `selection.js`, `interaction.js`, `filters.js`, `search.js`, `graph.js`).
-* **Physics Engine:** [D3.js v7](https://d3js.org/) (`d3-force` for 2D physical simulation and force calculations).
-* **3D Engine:** [3d-force-graph](https://github.com/vasturiano/3d-force-graph) / [Three.js](https://threejs.org/) (WebGL rendering and `OrbitControls`).
-* **2D Rendering:** HTML5 Canvas 2D API optimized with off-viewport coordinate culling.
-* **Styling & UI:** [Tailwind CSS v4](https://tailwindcss.com/) + Google Fonts typography (Inter).
-
----
-
-## 📂 Project Structure
-
-```
-visualizzazione dei dati/
-├── README.md                      # Main project documentation
-├── data/                          # Source CSV dataset
-│   ├── K-pop_node.csv             # Node definitions (id, name, type)
-│   └── K-pop_edge.csv             # Relationship definitions (source, target)
-├── docs/                          # Technical documentation and media
-│   ├── TECHNICAL_DOCUMENT.md      # Technical project report
-│   ├── HOW_IT_WORKS.md            # Architectural/how-it-works guide
-│   ├── OPTIMIZATIONS.md           # Performance optimization notes
-│   └── screenshots/               # Folder for application screenshots
-│   ├── index.html                 # HTML structure of the application
-│   ├── style.css                  # Custom styles and CSS utilities
-│   └── js/                        # ES6 JavaScript modules
-│       ├── config.js              # Colors, radii, and forces configuration
-│       ├── data.js                # CSV data loading and parsing
-│       ├── filters.js             # View filters management
-│       ├── graph.js               # Main KPopNetworkGraph class
-│       ├── interaction.js         # 2D mouse events (pan, drag, zoom)
-│       ├── main.js                # Application entry point
-│       ├── navigation.js          # Smooth framing and zoom reset
-│       ├── renderer.js            # 2D Canvas rendering engine
-│       ├── renderer3d.js          # 3D WebGL rendering engine & OrbitControls
-│       ├── search.js              # Search and entity highlighting
-│       └── selection.js           # Selection management and details sidebar
-└── scripts/                       # Helper scripts for cleaning/deduplication
-    └── deduplicate.js
-```
-
----
-
-## 📊 CSV Data Format
-
-The application loads data in real time from the CSV files located in the `data/` folder:
-
-### 1. `K-pop_node.csv` (4,674 Entities)
-| Field | Type | Description | Allowed Values |
-|---|---|---|---|
-| `id` | String | Unique identifier of the entity | e.g., `SM_Entertainment`, `BTS` |
-| `name` | String | Human-readable name of the entity | e.g., `SM Entertainment`, `BTS` |
-| `type` | String | Category of the entity | `label`, `group`, `person`, `male`, `female` |
-
-### 2. `K-pop_edge.csv` (5,094 Relationships)
-| Field | Type | Description | Inferred Relationship |
-|---|---|---|---|
-| `source` | String | ID of the source entity | `label` ➔ Management |
-| `target` | String | ID of the target entity | `artist` ➔ `group` (Membership) |
-
----
-
-## 🚀 Local Setup & Running
-
-Since the application uses **ES6 Modules** and loads CSV files via `fetch`/`d3.csv`, it must be served through a local web server.
-
-### Method 1: Node.js / `npx serve` (Recommended)
-Run in the project directory:
 ```bash
-npx serve kpop-graph
+python -m http.server 8765
 ```
-Open the address shown in the terminal in your browser (e.g., `http://localhost:3000`).
 
-### Method 2: Python HTTP Server
-Run in the project root:
+oppure, con Node già installato:
+
 ```bash
-python -m http.server 8000
+npx http-server -p 8765
 ```
-Open in your browser: `http://localhost:8000/kpop-graph/`
 
-### Method 3: VS Code Live Server
-Open the folder in Visual Studio Code and click **"Go Live"** to start the Live Server extension on the `kpop-graph/index.html` file.
+Poi apri `http://localhost:8765/` nel browser.
+
+## Struttura del progetto
+
+```
+index.html               markup della pagina, carica styles.css, D3 e src/main.js
+styles.css                tutti gli stili (tema chiaro/scuro incluso)
+vendor/
+  d3.v7.min.js            libreria D3 v7.9.0, invariata rispetto all'originale
+src/
+  data/
+    data.json             dataset: nodi (artisti/gruppi/agenzie) e archi (collegamenti)
+  core/                    logica pura, nessuna dipendenza da DOM/canvas
+    graph.js               normalizzazione dati grezzi -> nodes/byId/adj
+    neighborhood.js         BFS multi-seed con raggio/blocchi/modalità label
+    search.js               ricerca testuale sui nodi
+  ui/                      livello di presentazione, dipende da DOM/canvas
+    state.js                store centrale (stato + azioni + pub/sub)
+    palette.js              lettura colori dal tema CSS, ascolto dark-mode
+    dom-helpers.js           costruzione elementi DOM (h, swatch, clip, typeLabel)
+    canvas-renderer.js      simulazione d3-force e disegno su canvas
+    sidebar.js               ricerca, chip partenze/sfavoriti, statistiche
+    detail-panel.js          pannello di dettaglio del nodo selezionato
+  main.js                  bootstrap: carica i dati e collega tutti i moduli
+test/
+  graph.test.js
+  neighborhood.test.js
+  search.test.js
+```
+
+### Perché questa divisione
+
+- **`core/`** contiene solo funzioni pure (input → output, niente `window`
+  o `document`): sono testabili in isolamento e sono le stesse identiche
+  funzioni usate sia nei test Node sia nel browser.
+- **`ui/`** orchestra DOM e canvas. `state.js` è l'unico punto che possiede
+  lo stato mutabile; ogni altro modulo si iscrive con `store.subscribe()`
+  e reagisce ai cambiamenti, senza chiamarsi a vicenda direttamente.
+- **`main.js`** è puro wiring: crea le istanze e le collega. Non contiene
+  logica applicativa.
+
+## Sviluppo
+
+### Eseguire i test
+
+Serve solo Node.js ≥ 18 (nessuna dipendenza da installare: si usa il test
+runner integrato `node:test`).
+
+```bash
+node --test
+```
+
+Copre `core/graph.js`, `core/neighborhood.js` e `core/search.js` con test
+unitari su dataset di controllo piccoli e verificabili a mano. I moduli in
+`ui/` non hanno test automatici (richiedono DOM/canvas reali): la verifica
+è visuale, tramite il browser.
+
+### Modificare la logica del grafo
+
+Le funzioni in `core/` sono pure: se cambi `computeNeighborhood` o
+`search`, aggiorna anche i test corrispondenti in `test/`, poi verifica con
+`node --test`.
+
+### Modificare l'interfaccia
+
+I moduli in `ui/` seguono il pattern "si iscrive allo store": se aggiungi
+un nuovo pezzo di UI che deve reagire ai cambiamenti di stato, usa
+`store.subscribe(callback)` invece di aggiungere nuove chiamate dirette tra
+moduli. Dopo una modifica visuale, avvia il server locale e controlla a
+occhio (non ci sono test automatici per questa parte).
+
+### Aggiungere un preset
+
+I preset (i pulsanti "Esempi" nella sidebar) sono definiti in
+`src/ui/state.js`, oggetto `PRESETS`. Ogni preset specifica `seeds`,
+`blocked`, `radius` e `labelMode`; il pulsante nel markup deve avere
+`data-preset="<nomepreset>"`.
+
+## Dataset
+
+`src/data/data.json` contiene due array:
+
+- `nodes`: `[id, tipo, nome]` dove tipo è un indice 0-4 che corrisponde a
+  `['group', 'male', 'female', 'person', 'label']` (vedi `TYPES` in
+  `src/core/graph.js`)
+- `edges`: `[idA, idB]`, collegamento non orientato tra due nodi
+
+Per aggiornare il dataset, basta sostituire questo file mantenendo lo
+stesso formato: nessun altro file dipende dalla sua origine.
