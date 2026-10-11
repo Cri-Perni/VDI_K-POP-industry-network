@@ -6,6 +6,7 @@
 
 import { TYPES, TYPE_LABELS_IT } from '../core/graph.js';
 import { search as searchNodes } from '../core/search.js';
+import { computeSuggestedNodes } from '../core/suggestions.js';
 import { h, swatch, typeLabel } from './dom-helpers.js';
 
 /**
@@ -13,6 +14,7 @@ import { h, swatch, typeLabel } from './dom-helpers.js';
  * @param {object} opts.store
  * @param {Array} opts.nodes
  * @param {Map<number, object>} opts.byId
+ * @param {Map<number, number[]>} opts.adj
  * @param {(id:number)=>void} opts.onCenterOn  richiamata quando l'utente clicca
  *        su un nodo già presente nel grafico visualizzato (es. una chip),
  *        per centrare la vista canvas su di esso
@@ -21,13 +23,17 @@ import { h, swatch, typeLabel } from './dom-helpers.js';
  *   seeds: HTMLElement, blocked: HTMLElement,
  *   nSeeds: HTMLElement, nBlocked: HTMLElement, rOut: HTMLElement,
  *   stats: HTMLElement, legend: HTMLElement,
+ *   suggestionsBox: HTMLElement, suggestions: HTMLElement,
  *   commonsBox: HTMLElement, commons: HTMLElement, hubs: HTMLElement,
  * }} opts.els  riferimenti agli elementi DOM della sidebar
  * @param {() => Set<number>} opts.isInView  ritorna l'insieme di id attualmente
  *        visualizzati nel grafico (per decidere se una chip è cliccabile)
  */
-export function createSidebar({ store, nodes, byId, els, onCenterOn, isInView }) {
-  const { q, results, seeds, blocked, nSeeds, nBlocked, rOut, stats, legend, commonsBox, commons, hubs } = els;
+export function createSidebar({ store, nodes, byId, adj, els, onCenterOn, isInView }) {
+  const {
+    q, results, seeds, blocked, nSeeds, nBlocked, rOut,
+    stats, legend, suggestionsBox, suggestions, commonsBox, commons, hubs,
+  } = els;
 
   function renderResults() {
     const { list, total } = searchNodes(nodes, byId, q.value);
@@ -108,6 +114,86 @@ export function createSidebar({ store, nodes, byId, els, onCenterOn, isInView })
       row('Nodi tolti dagli sfavoriti', Math.max(0, base - res.hop.size));
     }
     for (const t of TYPES) legend.append(h('li', {}, swatch(t), TYPE_LABELS_IT[t], h('span', { class: 'n', text: counts[t] })));
+
+    // Classifica nodi suggeriti (soglia minima 2 partenze)
+    suggestionsBox.hidden = !res;
+    suggestions.replaceChildren();
+    if (res) {
+      if (store.state.seeds.size < 2) {
+        suggestions.append(h('li', {
+          class: 'none',
+          text: 'Seleziona almeno 2 partenze per calcolare i nodi suggeriti.'
+        }));
+      } else {
+        const suggestedList = computeSuggestedNodes({
+          adj,
+          byId,
+          seeds: store.state.seeds,
+          reachedBy: res.reachedBy,
+          hop: res.hop,
+          blocked: store.state.blocked,
+          minSeeds: 2,
+        });
+
+        if (!suggestedList.length) {
+          suggestions.append(h('li', {
+            class: 'none',
+            text: 'Nessun nodo è raggiunto da almeno 2 partenze con i filtri attuali.'
+          }));
+        } else {
+          const topSuggestions = suggestedList.slice(0, 10);
+          for (let i = 0; i < topSuggestions.length; i++) {
+            const item = topSuggestions[i];
+            const isSeed = store.state.seeds.has(item.id);
+            const isBlk = store.state.blocked.has(item.id);
+
+            const viaList = item.intermediaries
+              .filter(int => int.viaName)
+              .map(int => int.viaDeg ? `${int.viaName} (grado ${int.viaDeg})` : int.viaName);
+            const viaText = viaList.length > 0
+              ? `Via: ${viaList.slice(0, 2).join(', ')}${viaList.length > 2 ? ` (+${viaList.length - 2})` : ''}`
+              : 'Connessione diretta';
+
+            suggestions.append(h('li', { class: 'rank-row' },
+              h('span', { class: 'rank-badge', text: `#${i + 1}` }),
+              swatch(item.type),
+              h('span', { class: 'who' },
+                h('button', {
+                  class: 'rank-btn plain',
+                  text: item.name,
+                  title: `${item.name} (${typeLabel(item.type)}, ${item.deg} collegamenti) - Clicca per centrare`,
+                  onclick: () => {
+                    if (isInView().has(item.id)) {
+                      store.select(item.id);
+                      onCenterOn(item.id);
+                    }
+                  }
+                }),
+                h('span', { class: 'meta' },
+                  h('strong', { class: 'score-pill', text: `${item.score} pt` }),
+                  ` • ${item.seedCount} partenze • `,
+                  h('span', { class: 'via-info', title: viaList.join(', ') || 'Diretto' }, viaText)
+                )
+              ),
+              h('span', { class: 'acts' },
+                h('button', {
+                  class: 'mini go' + (isSeed ? ' on' : ''),
+                  text: isSeed ? 'Togli' : 'Parti',
+                  'aria-label': `${isSeed ? 'Togli dalle partenze' : 'Parti da'} ${item.name}`,
+                  onclick: () => store.toggleSeed(item.id),
+                }),
+                h('button', {
+                  class: 'mini no' + (isBlk ? ' on' : ''),
+                  text: isBlk ? 'Riammetti' : 'Evita',
+                  'aria-label': `${isBlk ? 'Riammetti' : 'Evita'} ${item.name}`,
+                  onclick: () => store.toggleBlocked(item.id),
+                })
+              )
+            ));
+          }
+        }
+      }
+    }
 
     commonsBox.hidden = !(res && store.state.seeds.size > 1);
     commons.replaceChildren();

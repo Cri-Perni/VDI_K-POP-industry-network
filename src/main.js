@@ -31,12 +31,13 @@ async function main() {
   watchPalette(palette => renderer.setPalette(palette));
 
   const sidebar = createSidebar({
-    store, nodes, byId,
+    store, nodes, byId, adj,
     els: {
       q: $('q'), results: $('results'),
       seeds: $('seeds'), blocked: $('blocked'),
       nSeeds: $('n-seeds'), nBlocked: $('n-blocked'), rOut: $('r-out'),
       stats: $('stats'), legend: $('legend'),
+      suggestionsBox: $('suggestionsBox'), suggestions: $('suggestions'),
       commonsBox: $('commonsBox'), commons: $('commons'), hubs: $('hubs'),
     },
     onCenterOn: id => renderer.centerOn(id),
@@ -44,7 +45,7 @@ async function main() {
   });
 
   const detailPanel = createDetailPanel({
-    store, byId, box: $('detail'),
+    store, byId, adj, box: $('detail'),
     getViewNode: id => renderer.getViewNode(id),
     getViewNeighbors: id => renderer.getViewNeighbors(id),
     onCenterOn: id => renderer.centerOn(id),

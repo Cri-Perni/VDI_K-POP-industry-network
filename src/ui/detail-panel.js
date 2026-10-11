@@ -6,17 +6,19 @@
 // attuale" (che vivono nel renderer, non nello store).
 
 import { h, swatch, typeLabel } from './dom-helpers.js';
+import { computeSuggestedNodes } from '../core/suggestions.js';
 
 /**
  * @param {object} opts
  * @param {object} opts.store
  * @param {Map<number, object>} opts.byId
+ * @param {Map<number, number[]>} opts.adj
  * @param {HTMLElement} opts.box   contenitore #detail (assoluto, hidden by default)
  * @param {(id:number) => object|undefined} opts.getViewNode
  * @param {(id:number) => Set<number>} opts.getViewNeighbors
  * @param {(id:number) => void} opts.onCenterOn
  */
-export function createDetailPanel({ store, byId, box, getViewNode, getViewNeighbors, onCenterOn }) {
+export function createDetailPanel({ store, byId, adj, box, getViewNode, getViewNeighbors, onCenterOn }) {
   function render() {
     const id = store.state.selected;
     const n = id != null ? getViewNode(id) : null;
@@ -26,12 +28,31 @@ export function createDetailPanel({ store, byId, box, getViewNode, getViewNeighb
     const isSeed = store.state.seeds.has(id);
     const seedNames = n.by.filter(s => s !== id).map(s => byId.get(s).name);
 
+    let suggInfo = null;
+    if (!isSeed && n.by && n.by.length >= 2 && adj) {
+      const suggs = computeSuggestedNodes({
+        adj,
+        byId,
+        seeds: store.state.seeds,
+        reachedBy: new Map([[n.id, n.by]]),
+        hop: new Map([[n.id, n.hop]]),
+        blocked: store.state.blocked,
+        minSeeds: 2,
+      });
+      if (suggs.length > 0) {
+        suggInfo = suggs[0];
+      }
+    }
+
     box.replaceChildren(...[
       h('button', { class: 'close', text: '×', 'aria-label': 'Chiudi', onclick: () => store.select(null) }),
       h('h3', { text: n.name }),
       h('p', { class: 'sub' }, swatch(n.type), `${typeLabel(n.type)}, id ${n.id}`),
       h('p', { text: `${n.deg} collegamenti in totale, ${near.length} in questo grafico.` }),
       h('p', { text: isSeed ? 'È un nodo di partenza.' : `A ${n.hop} ${n.hop === 1 ? 'passo' : 'passi'} da una partenza.` }),
+      suggInfo
+        ? h('p', { class: 'suggestion-score', text: `⭐ Punteggio suggerimento: ${suggInfo.score} pt (${suggInfo.seedCount} partenze)` })
+        : null,
       !isSeed && seedNames.length
         ? h('p', { text: 'Raggiunto da: ' + seedNames.slice(0, 4).join(', ') + (seedNames.length > 4 ? ` e altri ${seedNames.length - 4}` : '') + '.' })
         : null,
