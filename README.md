@@ -1,114 +1,187 @@
-# Intorni K-pop
+# Intorni K-pop — K-POP Industry Network
 
-Visualizzatore interattivo della rete di collegamenti tra artisti, gruppi
-e agenzie K-pop. Parti da uno o più nodi, escludi ciò che non ti interessa,
-e osserva l'intorno che si forma con un grafo a forze su canvas.
+Applicazione web interattiva per l'esplorazione, l'analisi e la visualizzazione delle reti di relazioni nell'industria musicale del K-pop (artisti, gruppi, agenzie discografiche e professionisti del settore).
 
-## Uso
+Il progetto permette di isolare ed esplorare l'intorno relazionale (*ego-network* o *multi-seed neighborhood*) a partire da uno o più nodi selezionati, identificare nodi ponte ("bridge") in comune, escludere intermediari ("sfavoriti") per scoprire percorsi alternativi e ottenere suggerimenti personalizzati tramite algoritmi di *link prediction*.
 
-L'app è composta da file statici (nessun bundler, nessuna build). Il
-dataset viene caricato con `fetch`, che i browser bloccano se apri il file
-`index.html` direttamente (`file://`): serve un server HTTP locale, anche
-minimo.
+---
 
-Dalla cartella del progetto:
+## Funzionalità Principali
+
+- **Ricerca intelligente ed estesa**:
+  - Ricerca per nome con supporto completo all'alfabeto Hangul (caratteri coreani) e caratteri latini, insensibile a maiuscole/minuscole e segni diacritici (`norm()`).
+  - Ricerca diretta tramite ID numerico del nodo.
+  - Ordinamento per pertinenza (corrispondenza esatta, prefisso, sottostringa) e popolarità (grado di connessione del nodo).
+- **Esplorazione Multi-Seed & Raggio di Distanza**:
+  - Possibilità di selezionare uno o più nodi di partenza contemporaneamente (*seeds*).
+  - Regolazione del raggio massimo di esplorazione da 1 a 4 passi (*hops*).
+- **Filtri e Nodi Sfavoriti (Blocked)**:
+  - Esclusione mirata di specifici nodi per impedire che il calcolo dell'intorno passi attraverso di essi, rivelando connessioni meno ovvie.
+- **Gestione avanzata delle Agenzie (Label)**:
+  Le agenzie collegano spesso centinaia di artisti, rischiando di far esplodere la dimensione del grafo:
+  - **Fanno da ponte** (*through*): attraversate come qualsiasi altro nodo.
+  - **Visibili, ma non fanno da ponte** (*endpoint*): visibili nel grafo come foglie/collegamenti diretti, senza espansione ulteriore.
+  - **Nascoste** (*hide*): escluse sia dai cammini che dalla visualizzazione.
+- **Identificazione Nodi in Comune & Ponti (Bridge)**:
+  - Calcolo e visualizzazione in risalto dei nodi raggiunti da tutte le partenze o da almeno due partenze.
+  - Tracciamento visivo dei cammini minimi (*shortest paths*) tra le partenze e i nodi in comune.
+- **Classifica dei Nodi Suggeriti (Link Recommendation)**:
+  - Algoritmo ispirato al **Resource Allocation Index (RAI)**:
+    - Premia i nodi raggiunti da più partenze.
+    - Premia le connessioni dirette e i cammini che passano per intermediari a basso grado (connessioni rare e specifiche).
+    - Penalizza i passaggi attraverso grandi hub o grandi agenzie.
+  - Visualizzazione trasparente del punteggio e dei cammini intermedi nella sidebar e nel pannello di dettaglio.
+- **Hub dell'Intorno**:
+  - Classifica immediata dei nodi con il maggior numero di connessioni nell'intorno corrente.
+- **Rendering ad Alte Prestazioni con Layout a Forze**:
+  - Simulazione fisica interattiva guidata da forze (`d3-force`) disegnata su HTML5 Canvas.
+  - Navigazione fluida: Pan (trascinamento dello sfondo), Zoom (rotella del mouse / pinch), trascinamento dei singoli nodi, centratura automatica sulla selezione.
+- **Preset Didattici**:
+  - Scenari preconfigurati per esplorare casi studio reali (es. connessioni tra *EXO* e *SHINee* con e senza *S.M. Entertainment*; relazioni tra membri di *BEAST*, *4Minute*, *Brown Eyed Girls* e *BIGBANG* con e senza intermediari come *Shinsadong Tiger* o *Hyuna*).
+- **Tema Chiaro e Scuro**:
+  - Rilevamento automatico delle preferenze di sistema (`prefers-color-scheme`) e transizione dinamica della palette colori del canvas.
+- **Protezione da Sovraccarico**:
+  - Soglia massima di nodi visualizzabili (`MAX_NODES = 1500`) con avviso all'utente per garantire sempre fluidità a 60 fps.
+
+---
+
+## Tipologie di Nodi e Palette Colori
+
+| Tipo | Categoria | Descrizione |
+| :--- | :--- | :--- |
+| <span style="color:#6C4CF1">●</span> `group` | **Gruppo** | Band o gruppi musicali (es. EXO, BIGBANG, SHINee) |
+| <span style="color:#1E88E5">●</span> `male` | **Uomo** | Artisti e performer maschili |
+| <span style="color:#E8437F">●</span> `female` | **Donna** | Artiste e performer femminili |
+| <span style="color:#0FA39A">●</span> `person` | **Persona** | Produttori musicali, compositori e staff del settore |
+| <span style="color:#7C879E">●</span> `label` | **Agenzia** | Agenzie di intrattenimento e case discografiche (es. SM, YG, JYP, Cube) |
+
+---
+
+## Struttura del Progetto
+
+```text
+VDI_K-POP-industry-network-main/
+├── index.html                 # Pagina principale dell'applicazione
+├── styles.css                 # Fogli di stile (layout, palette chiare/scure, responsive)
+├── K-pop_node.csv             # Dataset originale nodi (id, type, name)
+├── K-pop_edge.csv             # Dataset originale archi (source, target)
+│
+├── src/
+│   ├── main.js                # Bootstrap dell'app: wiring tra dati, store e UI
+│   │
+│   ├── core/                  # Logica di business pura (zero dipendenze da DOM/Canvas)
+│   │   ├── graph.js           # Normalizzazione stringhe (Hangul/diacritici) e costruzione del grafo
+│   │   ├── neighborhood.js    # BFS multi-seed, calcolo intorni e cammini minimi
+│   │   ├── search.js          # Motore di ricerca testuale e per ID numerico
+│   │   └── suggestions.js     # Algoritmo di ranking e raccomandazione nodi (Resource Allocation)
+│   │
+│   ├── data/
+│   │   └── data.json          # Dataset compilato e compresso per caricamento istantaneo
+│   │
+│   └── ui/                    # Moduli dell'interfaccia utente
+│       ├── state.js           # Store reattivo centrale dell'applicazione (Observer pattern)
+│       ├── canvas-renderer.js # Simulazione d3-force e disegno su HTML5 Canvas
+│       ├── sidebar.js         # Ricerca, chip partenze/sfavoriti, controlli, statistiche e classifiche
+│       ├── detail-panel.js    # Scheda descrittiva del nodo selezionato e collegamenti
+│       ├── palette.js         # Gestione colori e listener preferenze dark mode
+│       └── dom-helpers.js     # Utility per la creazione dichiarativa di elementi DOM
+│
+├── test/                      # Suite di test unitari (Node.js test runner)
+│   ├── graph.test.js          # Test su normalizzazione e costruzione strutture adiacenza
+│   ├── neighborhood.test.js   # Test su BFS, filtri agenzie, nodi bloccati e cammini
+│   ├── search.test.js         # Test sul motore di ricerca e ordinamenti
+│   └── suggestions.test.js    # Test sull'algoritmo di raccomandazione
+│
+└── vendor/
+    └── d3.v7.min.js           # Libreria D3.js v7 (d3-force, d3-zoom)
+```
+
+---
+
+## Come Eseguire il Progetto
+
+Poiché l'applicazione utilizza **ES Modules** nativi (`import`/`export`) ed effettua una chiamata `fetch()` per caricare `src/data/data.json`, deve essere servita tramite un server web HTTP locale (non tramite doppio clic con protocollo `file://`, che bloccherebbe le richieste per le policy CORS dei browser moderni).
+
+Non è necessaria alcuna installazione con `npm install` (zero dipendenze esterne di build).
+
+### Opzione 1: Con Python (consigliato se già installato)
+
+Dalla cartella principale del progetto:
 
 ```bash
-python -m http.server 8765
+# Con Python 3
+python -m http.server 8000
 ```
 
-oppure, con Node già installato:
+Apri il browser su: [http://localhost:8000](http://localhost:8000)
+
+### Opzione 2: Con Node.js (`npx`)
+
+Se hai installato Node.js:
 
 ```bash
-npx http-server -p 8765
+# Utilizzando serve
+npx serve .
+
+# Oppure utilizzando http-server
+npx http-server -p 8000 .
 ```
 
-Poi apri `http://localhost:8765/` nel browser.
+### Opzione 3: Con estensione Visual Studio Code
 
-## Struttura del progetto
+1. Apri la cartella del progetto in **VS Code**.
+2. Installa l'estensione **Live Server** (di Ritwick Dey).
+3. Clicca con il tasto destro su `index.html` e seleziona **"Open with Live Server"**.
 
-```
-index.html               markup della pagina, carica styles.css, D3 e src/main.js
-styles.css                tutti gli stili (tema chiaro/scuro incluso)
-vendor/
-  d3.v7.min.js            libreria D3 v7.9.0, invariata rispetto all'originale
-src/
-  data/
-    data.json             dataset: nodi (artisti/gruppi/agenzie) e archi (collegamenti)
-  core/                    logica pura, nessuna dipendenza da DOM/canvas
-    graph.js               normalizzazione dati grezzi -> nodes/byId/adj
-    neighborhood.js         BFS multi-seed con raggio/blocchi/modalità label
-    search.js               ricerca testuale sui nodi
-  ui/                      livello di presentazione, dipende da DOM/canvas
-    state.js                store centrale (stato + azioni + pub/sub)
-    palette.js              lettura colori dal tema CSS, ascolto dark-mode
-    dom-helpers.js           costruzione elementi DOM (h, swatch, clip, typeLabel)
-    canvas-renderer.js      simulazione d3-force e disegno su canvas
-    sidebar.js               ricerca, chip partenze/sfavoriti, statistiche
-    detail-panel.js          pannello di dettaglio del nodo selezionato
-  main.js                  bootstrap: carica i dati e collega tutti i moduli
-test/
-  graph.test.js
-  neighborhood.test.js
-  search.test.js
-```
+---
 
-### Perché questa divisione
+## Esecuzione dei Test Unitari
 
-- **`core/`** contiene solo funzioni pure (input → output, niente `window`
-  o `document`): sono testabili in isolamento e sono le stesse identiche
-  funzioni usate sia nei test Node sia nel browser.
-- **`ui/`** orchestra DOM e canvas. `state.js` è l'unico punto che possiede
-  lo stato mutabile; ogni altro modulo si iscrive con `store.subscribe()`
-  e reagisce ai cambiamenti, senza chiamarsi a vicenda direttamente.
-- **`main.js`** è puro wiring: crea le istanze e le collega. Non contiene
-  logica applicativa.
+Il progetto include **58 test unitari** che verificano la correttezza matematica e logica di tutte le funzioni pure in `src/core/`.
 
-## Sviluppo
+I test utilizzano il test runner nativo di **Node.js** (`node:test` e `node:assert/strict`), quindi non richiedono Jest o configurazioni aggiuntive.
 
-### Eseguire i test
-
-Serve solo Node.js ≥ 18 (nessuna dipendenza da installare: si usa il test
-runner integrato `node:test`).
+Per eseguire l'intera suite di test:
 
 ```bash
 node --test
 ```
 
-Copre `core/graph.js`, `core/neighborhood.js` e `core/search.js` con test
-unitari su dataset di controllo piccoli e verificabili a mano. I moduli in
-`ui/` non hanno test automatici (richiedono DOM/canvas reali): la verifica
-è visuale, tramite il browser.
+Output atteso:
+```text
+ℹ tests 58
+ℹ suites 14
+ℹ pass 58
+ℹ fail 0
+```
 
-### Modificare la logica del grafo
+---
 
-Le funzioni in `core/` sono pure: se cambi `computeNeighborhood` o
-`search`, aggiorna anche i test corrispondenti in `test/`, poi verifica con
-`node --test`.
+## 🎮 Controlli e Interazione
 
-### Modificare l'interfaccia
+### Interazioni sul Canvas
+- **Spostamento (Pan)**: Trascina lo sfondo con il tasto sinistro del mouse.
+- **Zoom**: Scorri con la rotella del mouse o effettua un gesto di pinch su touchpad/touchscreen.
+- **Selezione nodo**: Clicca su un nodo con il tasto sinistro per aprire la scheda di dettaglio.
+- **Aggiungi/Rimuovi partenza**: Fai **doppio clic** su un nodo per impostarlo come nodo di partenza.
+- **Sfavorisci/Blocca nodo**: Fai **clic con il tasto destro** su un nodo per bloccarlo ed escluderlo dai percorsi.
+- **Riposiziona nodi**: Trascina un nodo per guidare la simulazione fisica.
+- **Pulsante "Adatta alla vista"**: Riposiziona e adatta lo zoom del grafo per inquadrare tutti i nodi visualizzati.
 
-I moduli in `ui/` seguono il pattern "si iscrive allo store": se aggiungi
-un nuovo pezzo di UI che deve reagire ai cambiamenti di stato, usa
-`store.subscribe(callback)` invece di aggiungere nuove chiamate dirette tra
-moduli. Dopo una modifica visuale, avvia il server locale e controlla a
-occhio (non ci sono test automatici per questa parte).
+### Controlli nella Barra Laterale
+- **Cerca**: Digita il nome di un artista/gruppo o il suo ID numerico. Dai risultati puoi cliccare su **Parti** o **Evita**.
+- **Chip Partenza e Sfavoriti**: Clicca sul nome per centrare la visuale, oppure sulla `×` per rimuoverlo.
+- **Distanza massima**: Slider per definire la profondità della BFS (da 1 a 4).
+- **Agenzie (label)**: Menu a tendina per scegliere se far attraversare le agenzie (*through*), tenerle solo come estremi (*endpoint*) o nasconderle (*hide*).
+- **Evidenzia nodi in comune**: Evidenzia i nodi condivisi tramite un anello dorato e illumina i cammini minimi che li collegano alle partenze.
+- **Esempi / Preset**: Pulsanti per caricare scenari ed esplorazioni significative con un solo clic.
 
-### Aggiungere un preset
+---
 
-I preset (i pulsanti "Esempi" nella sidebar) sono definiti in
-`src/ui/state.js`, oggetto `PRESETS`. Ogni preset specifica `seeds`,
-`blocked`, `radius` e `labelMode`; il pulsante nel markup deve avere
-`data-preset="<nomepreset>"`.
+## 📊 Dati e Fonti
 
-## Dataset
+I dati provengono dall'analisi delle connessioni dell'industria K-pop raccolti nei file:
+- `K-pop_node.csv`: 4.676 nodi classificati per tipologia.
+- `K-pop_edge.csv`: 5.096 collegamenti non orientati (collaborazioni, appartenenze a gruppi, contratti d'agenzia).
 
-`src/data/data.json` contiene due array:
-
-- `nodes`: `[id, tipo, nome]` dove tipo è un indice 0-4 che corrisponde a
-  `['group', 'male', 'female', 'person', 'label']` (vedi `TYPES` in
-  `src/core/graph.js`)
-- `edges`: `[idA, idB]`, collegamento non orientato tra due nodi
-
-Per aggiornare il dataset, basta sostituire questo file mantenendo lo
-stesso formato: nessun altro file dipende dalla sua origine.
+Per ottimizzare le prestazioni e ridurre i tempi di avvio, i dati sono stati indicizzati e convertiti in `src/data/data.json`.
