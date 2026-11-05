@@ -178,7 +178,7 @@ Output atteso:
 
 ---
 
-## 📊 Dati e Fonti
+## Dati e Fonti
 
 I dati provengono dall'analisi delle connessioni dell'industria K-pop raccolti nei file:
 - `K-pop_node.csv`: 4.676 nodi classificati per tipologia.
